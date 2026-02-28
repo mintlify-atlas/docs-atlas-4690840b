@@ -1,0 +1,474 @@
+---
+title: Semantic Search
+description: Local ONNX-powered semantic search with 384-dimensional embeddings
+icon: "magnifying-glass"
+---
+
+## Overview
+
+flowState's semantic search finds notes based on **meaning**, not just keywords. Search using natural language queries and get results ranked by relevance, even when the exact words don't appear in your notes.
+
+<Info>
+**100% Local & Private**: All search happens on your machine using a local ONNX model. Your notes never leave your device.
+</Info>
+
+## How It Works
+
+### Semantic Embeddings
+
+flowState uses the `all-MiniLM-L6-v2` transformer model to convert text into numerical vectors:
+
+1. **Text → Vector**: Your notes are converted to 384-dimensional embeddings
+2. **Query → Vector**: Your search query is converted to the same embedding space
+3. **Similarity**: Results are ranked by cosine similarity between vectors
+4. **Ranking**: Most similar notes appear first
+
+<Note>
+Embeddings capture semantic meaning - "project meeting" will match notes about "team standup" even without shared keywords.
+</Note>
+
+## The Model
+
+### all-MiniLM-L6-v2
+
+flowState uses this proven sentence-transformer model:
+
+- **Model size**: ~90MB (downloaded on first run)
+- **Dimensions**: 384 (balanced between accuracy and speed)
+- **Architecture**: Sentence-BERT based on MiniLM
+- **Source**: HuggingFace `sentence-transformers/all-MiniLM-L6-v2-onnx`
+- **Format**: ONNX for cross-platform inference
+
+<Tip>
+The model downloads automatically on first search. Expect a one-time ~90MB download.
+</Tip>
+
+## Using Semantic Search
+
+<Steps>
+  <Step title="Open Search Screen">
+    Press `Ctrl+/` from anywhere in flowState
+  </Step>
+  <Step title="Enter Your Query">
+    Type a natural language query:
+    - "meeting notes from last week"
+    - "project ideas for website redesign"
+    - "research about semantic search"
+  </Step>
+  <Step title="Execute Search">
+    Press `Enter` to search
+    
+    <Note>
+    Search may take 1-2 seconds for the first query as the model loads.
+    </Note>
+  </Step>
+  <Step title="Review Results">
+    Results are ranked by similarity score (0.0 to 1.0)
+    - Higher scores = better matches
+    - Navigate with `j`/`k` or arrow keys
+  </Step>
+  <Step title="Open a Note">
+    Press `Enter` on a result to open that note
+  </Step>
+</Steps>
+
+## Query Types
+
+### Natural Language Queries
+
+Search using full sentences or phrases:
+
+```
+"notes about the client meeting yesterday"
+"ideas for improving our onboarding process"
+"research papers on machine learning"
+```
+
+<Tip>
+Semantic search understands context - you can use pronouns, synonyms, and conversational language.
+</Tip>
+
+### Keyword Queries
+
+Single words or phrases also work:
+
+```
+"productivity tools"
+"react hooks"
+"team standup"
+```
+
+### Question Queries
+
+Ask questions to find relevant notes:
+
+```
+"how do I set up authentication?"
+"what were the action items from the retrospective?"
+"where did I write about testing strategies?"
+```
+
+## Understanding Results
+
+### Similarity Scores
+
+Each result shows a score indicating match quality:
+
+- **0.8 - 1.0**: Excellent match (highly relevant)
+- **0.6 - 0.8**: Good match (relevant)
+- **0.4 - 0.6**: Fair match (somewhat relevant)
+- **< 0.4**: Weak match (might not be relevant)
+
+<Info>
+Scores are calculated using cosine similarity between query and note embeddings. Higher scores mean the semantic meaning is more similar.
+</Info>
+
+### Result Ranking
+
+Results are sorted by descending score:
+
+1. Highest similarity first
+2. Equal scores maintain database order (usually newest first)
+3. Low-scoring results are still shown (you decide the cutoff)
+
+### Result Display
+
+Each result shows:
+
+- **Score**: Similarity score as `[0.XX]`
+- **Preview**: First line of the note (usually the title)
+- **Selection**: Highlighted with cyan background when selected
+
+## Storage & Indexing
+
+### SQLite Vector Storage
+
+Embeddings are stored in the `note_vectors` table:
+
+```sql
+CREATE TABLE note_vectors (
+    note_id INTEGER PRIMARY KEY,
+    embedding BLOB NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+- **384 floats per note** (1536 bytes as blob)
+- **Indexed by note_id** for fast lookup
+- **Cascade delete** when notes are removed
+
+### Automatic Indexing
+
+Notes are indexed automatically:
+
+- **On create**: New notes are indexed when saved
+- **On update**: Edited notes are re-indexed
+- **On delete**: Embeddings are removed when notes are deleted
+
+<Note>
+Indexing happens in the background. Large notes may take a moment to index, but you can continue working.
+</Note>
+
+### Index Content
+
+Each note's embedding is generated from:
+
+- **Title**: Note title (full weight)
+- **Body**: Note body (combined with title)
+- **Combined**: `title + "\n" + body` for maximum context
+
+<Tip>
+Include context in your note titles for better search results. "Project X Meeting Notes - Feb 28" is more searchable than just "Meeting Notes".
+</Tip>
+
+## Privacy & Security
+
+### 100% Local
+
+Semantic search runs entirely on your machine:
+
+- ✅ **Model**: Downloaded once and stored locally
+- ✅ **Embeddings**: Generated on your device
+- ✅ **Search**: All computation happens locally
+- ✅ **Storage**: SQLite database on your filesystem
+- ❌ **No cloud**: Zero API calls to external services
+- ❌ **No telemetry**: Your searches are never logged or sent anywhere
+
+<Info>
+Your notes, queries, and embeddings never leave your machine. flowState is privacy-first by design.
+</Info>
+
+### Data Storage
+
+Your semantic search data is stored in:
+
+```
+~/.config/flowstate/flowstate.db          # SQLite database
+~/.config/flowstate/models/               # ONNX model directory
+  └── all-MiniLM-L6-v2/
+      └── model.onnx                       # ~90MB model file
+```
+
+## Performance
+
+### Speed
+
+- **First query**: 1-2 seconds (model loading)
+- **Subsequent queries**: < 500ms for 100 notes
+- **Indexing**: < 100ms per note on save
+
+<Note>
+Performance depends on your hardware. Faster CPUs and SSDs improve search speed.
+</Note>
+
+### Scalability
+
+Semantic search scales well:
+
+- **100 notes**: Instant search
+- **1,000 notes**: < 1 second
+- **10,000 notes**: A few seconds
+
+### Resource Usage
+
+- **RAM**: ~200MB for model + embeddings
+- **Storage**: 1.5KB per note (384 × 4 bytes)
+- **CPU**: Moderate during search, minimal when idle
+
+## Keyboard Reference
+
+<Info>
+Press `?` in the search screen to see contextual help.
+</Info>
+
+### Search Input Mode
+
+| Key | Action |
+|-----|--------|
+| Type | Enter search query |
+| `Enter` | Execute search |
+| `Esc` | Clear input / Return to notes |
+| `?` | Show help modal |
+
+### Results Mode
+
+| Key | Action |
+|-----|--------|
+| `j` / `↓` | Move selection down |
+| `k` / `↑` | Move selection up |
+| `Enter` | Open selected note |
+| `Esc` | Return to search input |
+| `?` | Show help modal |
+
+## Tips for Better Search
+
+<Tip>
+**Use descriptive queries**: "notes about client feedback on v2" beats "feedback" for finding specific content.
+</Tip>
+
+### Writing Searchable Notes
+
+1. **Descriptive titles**: Include context in note titles
+2. **Full sentences**: Write notes in natural language
+3. **Include context**: Add who/what/when/where/why
+4. **Use synonyms**: Include alternative terms in notes
+5. **Link related notes**: Connections improve context
+
+### Query Strategies
+
+1. **Be specific**: Narrow queries get better results than broad ones
+2. **Use questions**: "How do I deploy?" finds instructional notes
+3. **Include context**: "Q4 project planning" vs. just "planning"
+4. **Try variations**: Rephrase queries if results aren't relevant
+5. **Check scores**: Scores below 0.4 might not be useful
+
+## Combining with Other Features
+
+### Search + Tags
+
+Use tags to categorize, semantic search to find:
+
+```
+1. Tag notes with #project, #research, #ideas
+2. Use semantic search to find relevant content
+3. Results span all tags based on meaning, not category
+```
+
+### Search + Links
+
+Find notes, then explore connections:
+
+```
+1. Search for "authentication implementation"
+2. Open the best result
+3. Press Ctrl+L to see linked notes
+4. Discover related concepts through links
+```
+
+### Search + Mind Map
+
+Visualize search results in context:
+
+```
+1. Search for a topic
+2. Note the relevant notes
+3. Press Ctrl+G to open Mind Map
+4. See how results connect to your knowledge graph
+```
+
+## Advanced Usage
+
+### Bulk Re-indexing
+
+If you need to rebuild all embeddings:
+
+```bash
+# Future CLI command (not yet implemented)
+flowstate index --rebuild
+```
+
+<Note>
+Currently, indexing happens automatically. Manual re-indexing is planned for a future release.
+</Note>
+
+### Tag Filtering
+
+Combine semantic search with tag filters:
+
+```go
+// Implemented in internal/search/semantic.go
+results, _ := searcher.SearchWithTagFilter(
+    "project ideas", 
+    10, 
+    []string{"work", "active"}
+)
+```
+
+<Info>
+Tag filtering in the UI is planned for a future release.
+</Info>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Model download fails">
+    **Symptoms**: Error message about model download on first search
+    
+    **Solutions**:
+    - Check internet connection (one-time 90MB download)
+    - Verify disk space (~100MB free needed)
+    - Check firewall settings (allow flowstate to access HuggingFace)
+    - Try again - download may have been interrupted
+    
+    **Manual download**:
+    ```bash
+    # Download from HuggingFace manually
+    wget https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2-onnx/resolve/main/model.onnx
+    mv model.onnx ~/.config/flowstate/models/all-MiniLM-L6-v2/
+    ```
+  </Accordion>
+  
+  <Accordion title="Search returns no results">
+    **Possible causes**:
+    - No notes created yet (create notes first)
+    - Notes not indexed (wait a moment after creating notes)
+    - Query too specific (try broader terms)
+    - Model not loaded (check for error messages)
+    
+    **Try**:
+    - Create or edit a note to trigger indexing
+    - Use broader, simpler queries
+    - Restart flowstate to reload the model
+  </Accordion>
+  
+  <Accordion title="Search is slow">
+    **Expected on first query**: Model loading takes 1-2 seconds
+    
+    **If consistently slow**:
+    - Check CPU usage (other apps competing for resources)
+    - Verify SSD/HDD performance
+    - Restart flowstate to clear any memory issues
+    - For very large note collections (10,000+), search may take a few seconds
+  </Accordion>
+  
+  <Accordion title="Results don't match my query">
+    **Remember**: Semantic search finds meaning, not keywords
+    
+    **Low scores (< 0.4)**: Probably not relevant - ignore them
+    
+    **Unexpected results**: The model might see connections you don't
+    - Check what words/concepts overlap
+    - Rephrase your query more specifically
+    - Use exact keyword search if you need literal matches (future feature)
+  </Accordion>
+</AccordionGroup>
+
+## Technical Details
+
+### Embedding Generation
+
+The flow for creating embeddings:
+
+```
+Note (title + body)
+  ↓
+Tokenization (split into tokens)
+  ↓
+ONNX Model (all-MiniLM-L6-v2)
+  ↓
+384-dimensional vector
+  ↓
+Normalized (unit length)
+  ↓
+Stored in SQLite (note_vectors.embedding)
+```
+
+### Similarity Calculation
+
+Cosine similarity between query and note embeddings:
+
+```
+similarity = dot(query_embedding, note_embedding) / 
+             (||query_embedding|| × ||note_embedding||)
+```
+
+- **Range**: -1.0 to 1.0 (normalized to 0.0 to 1.0 for display)
+- **1.0**: Identical meaning
+- **0.0**: Completely unrelated
+- **Values < 0**: Opposite meaning (rare in practice)
+
+### Implementation
+
+Key files:
+
+- `internal/embeddings/embedder.go` - ONNX model interface
+- `internal/search/semantic.go` - Search orchestration
+- `internal/storage/sqlite/store.go` - Vector storage queries
+- `internal/tui/screens/search.go` - Search UI
+
+## Current Limitations
+
+<Warning>
+**Development Status**: The embedding system currently uses a placeholder hash-based approach for development. Full ONNX inference is the next step.
+</Warning>
+
+### Planned Enhancements
+
+- ✅ ONNX model download (implemented)
+- ⏳ ONNX runtime integration (in progress)
+- ⏳ True semantic embeddings (replacing hash-based placeholders)
+- ⏳ Tag filtering in UI
+- ⏳ Keyword + semantic hybrid search
+- ⏳ Search history
+- ⏳ Saved queries
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Notes" icon="note-sticky" href="/core/notes">
+    Write searchable notes with rich context
+  </Card>
+  <Card title="Mind Map" icon="diagram-project" href="/features/mind-map">
+    Visualize your knowledge graph
+  </Card>
+</CardGroup>

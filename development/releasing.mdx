@@ -1,0 +1,411 @@
+---
+title: Release Process
+description: Step-by-step guide for releasing new versions of flowState CLI (maintainers only)
+---
+
+## Overview
+
+flowState CLI uses an automated release process with GoReleaser for building binaries and GitHub Actions for CI/CD. Releases are published to both GitHub Releases and npm.
+
+<Warning>
+This guide is for **maintainers only**. Contributors should focus on pull requests instead.
+</Warning>
+
+## Prerequisites
+
+Before releasing, ensure you have:
+
+<CardGroup cols={2}>
+  <Card title="GoReleaser Installed" icon="rocket">
+    ```bash
+    go install github.com/goreleaser/goreleaser@latest
+    ```
+    
+    Verify: `goreleaser --version`
+  </Card>
+  
+  <Card title="GitHub Token" icon="key">
+    Set `GITHUB_TOKEN` environment variable with repo permissions:
+    
+    ```bash
+    export GITHUB_TOKEN=ghp_your_token_here
+    ```
+  </Card>
+  
+  <Card title="npm Access" icon="npm">
+    Publish access to `flowstate-cli` package:
+    
+    ```bash
+    npm login
+    npm whoami  # Verify login
+    ```
+  </Card>
+  
+  <Card title="Clean Working Tree" icon="code-branch">
+    No uncommitted changes:
+    
+    ```bash
+    git status  # Should be clean
+    ```
+  </Card>
+</CardGroup>
+
+## Release Steps
+
+<Steps>
+  <Step title="Update npm package version">
+    Edit `npm/package.json` and update the version field:
+    
+    ```json
+    {
+      "name": "flowstate-cli",
+      "version": "0.1.14",  // Update this
+      "description": "...",
+      // ...
+    }
+    ```
+    
+    <Warning>
+    **CRITICAL:** The npm package version **must match** the git tag version exactly!
+    
+    If you're releasing `v0.1.14`, set `"version": "0.1.14"` (without the `v` prefix).
+    </Warning>
+  </Step>
+  
+  <Step title="Update documentation">
+    Update relevant files:
+    
+    - `README.md` - Add new features to feature list, update screenshots
+    - `CLAUDE.md` - Mark phase as complete, add release notes
+    
+    Example commit:
+    ```bash
+    git add .
+    git commit -m "Prepare for v0.1.14 release"
+    ```
+  </Step>
+  
+  <Step title="Push changes to main">
+    ```bash
+    git push origin main
+    ```
+    
+    Wait for any CI checks to pass (if configured).
+  </Step>
+  
+  <Step title="Create and push git tag">
+    ```bash
+    # Create annotated tag
+    git tag -a v0.1.14 -m "Release v0.1.14 - Markdown rendering and animations"
+    
+    # Push the tag (this triggers the release workflow)
+    git push origin v0.1.14
+    ```
+    
+    <Note>
+    The tag **must** start with `v` to trigger the GitHub Actions workflow.
+    </Note>
+  </Step>
+  
+  <Step title="Monitor GitHub Actions">
+    1. Go to [github.com/Jericoz-JC/flowState-CLI/actions](https://github.com/Jericoz-JC/flowState-CLI/actions)
+    2. Watch the "Release" workflow run
+    3. Verify it completes successfully
+    
+    The workflow will:
+    - Build binaries for 6 platforms (Linux, macOS, Windows × amd64, arm64)
+    - Create a GitHub Release with all binaries
+    - Publish to npm (after GoReleaser completes)
+  </Step>
+  
+  <Step title="Verify GitHub Release">
+    Check [github.com/Jericoz-JC/flowState-CLI/releases/latest](https://github.com/Jericoz-JC/flowState-CLI/releases/latest)
+    
+    Ensure all 6 binaries are uploaded:
+    - `flowstate-linux-amd64.tar.gz`
+    - `flowstate-linux-arm64.tar.gz`
+    - `flowstate-darwin-amd64.tar.gz`
+    - `flowstate-darwin-arm64.tar.gz`
+    - `flowstate-windows-amd64.zip`
+    - `flowstate-windows-arm64.zip`
+  </Step>
+  
+  <Step title="Verify npm package">
+    Wait ~5 minutes for npm to update, then:
+    
+    ```bash
+    # Check latest version on npm
+    npm view flowstate-cli version
+    
+    # Test installation
+    npm install -g flowstate-cli@latest
+    flowstate --version
+    ```
+  </Step>
+</Steps>
+
+## Release Workflow Details
+
+### GitHub Actions Pipeline
+
+The `.github/workflows/release.yml` workflow runs on tag push:
+
+```yaml
+on:
+  push:
+    tags:
+      - 'v*'
+```
+
+**Job 1: goreleaser**
+1. Checkout code
+2. Set up Go 1.22
+3. Download Go modules
+4. Test build (`go build -v ./...`)
+5. Run GoReleaser to build binaries and create GitHub Release
+
+**Job 2: npm-publish** (runs after goreleaser)
+1. Checkout code
+2. Set up Node.js 20
+3. Publish to npm using `NPM_TOKEN` secret
+
+### GoReleaser Configuration
+
+The `.goreleaser.yaml` file defines the build:
+
+```yaml
+builds:
+  - main: ./cmd/flowState
+    binary: flowstate
+    env:
+      - CGO_ENABLED=0  # Pure Go, no C dependencies
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w  # Strip debug info for smaller binaries
+```
+
+**Result:** 6 static binaries (2 OSes × 3 architectures)
+
+### npm Package Structure
+
+The npm package (`npm/`) acts as a wrapper:
+
+- `package.json` - Metadata and install script
+- `install.js` - Downloads the correct binary from GitHub Releases
+- `bin/flowstate` - Wrapper script that runs the binary
+
+**Installation flow:**
+1. User runs `npm install -g flowstate-cli`
+2. npm runs `postinstall` script → `node install.js`
+3. `install.js` detects platform/arch and downloads binary from GitHub
+4. Binary is placed in `npm/dist/flowstate`
+5. `bin/flowstate` wrapper is added to PATH
+
+## Version Numbering
+
+We follow [Semantic Versioning](https://semver.org/):
+
+- **MAJOR** (0.x.x → 1.x.x) - Breaking changes, incompatible API changes
+- **MINOR** (0.1.x → 0.2.x) - New features, backward compatible
+- **PATCH** (0.1.1 → 0.1.2) - Bug fixes, backward compatible
+
+**Current versioning strategy:**
+- Pre-1.0: Minor versions for phases (v0.1.14, v0.1.15, etc.)
+- v1.0.0: First stable release
+- Post-1.0: Standard semver (1.1.0, 1.2.0, 2.0.0, etc.)
+
+## Important Notes
+
+<AccordionGroup>
+  <Accordion title="npm Version Must Match Git Tag">
+    ❌ **Wrong:**
+    ```json
+    // npm/package.json
+    "version": "0.1.13"
+    ```
+    ```bash
+    git tag v0.1.14  # MISMATCH!
+    ```
+    
+    ✅ **Correct:**
+    ```json
+    // npm/package.json
+    "version": "0.1.14"
+    ```
+    ```bash
+    git tag v0.1.14  # MATCH!
+    ```
+    
+    The npm install script downloads binaries based on the tag version, so they must match.
+  </Accordion>
+  
+  <Accordion title="GitHub Release Must Complete Before npm Publish">
+    The GitHub Actions workflow runs `npm-publish` **after** `goreleaser` completes.
+    
+    If you run `npm publish` manually too early, the install script will fail because binaries aren't uploaded yet.
+    
+    **Solution:** Let GitHub Actions handle both jobs automatically.
+  </Accordion>
+  
+  <Accordion title="Deleting Tags Won't Delete Releases">
+    If you need to redo a release:
+    
+    ```bash
+    # Delete local tag
+    git tag -d v0.1.14
+    
+    # Delete remote tag
+    git push origin :refs/tags/v0.1.14
+    
+    # Delete GitHub Release manually in UI
+    # Then recreate tag and push again
+    ```
+  </Accordion>
+  
+  <Accordion title="Test npm Package Locally Before Publishing">
+    ```bash
+    cd npm
+    npm pack
+    npm install -g flowstate-cli-0.1.14.tgz
+    flowstate  # Test it works
+    npm uninstall -g flowstate-cli
+    ```
+    
+    This creates a `.tgz` file you can test locally before the actual release.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+### Release Workflow Failed
+
+**Check the logs:**
+1. Go to [Actions tab](https://github.com/Jericoz-JC/flowState-CLI/actions)
+2. Click the failed workflow
+3. Expand the failed step
+
+**Common issues:**
+- **Build failed:** Syntax error in code, missing dependencies
+  - Fix: Ensure `go test ./...` passes locally
+- **GITHUB_TOKEN invalid:** Token expired or lacks permissions
+  - Fix: Generate new token with `repo` scope
+- **NPM_TOKEN invalid:** Token expired or wrong package permissions
+  - Fix: Regenerate token at [npmjs.com/settings/tokens](https://www.npmjs.com/settings/tokens)
+
+### npm Install Returns 404
+
+**Symptoms:**
+```bash
+npm install -g flowstate-cli
+# Error: 404 - Binary not found
+```
+
+**Diagnosis:**
+1. Check GitHub Release exists: [releases/tag/vX.Y.Z](https://github.com/Jericoz-JC/flowState-CLI/releases)
+2. Verify all 6 binaries are uploaded
+3. Check npm package version matches tag version
+
+**Solutions:**
+- If binaries missing: Re-run GoReleaser
+- If version mismatch: Update `npm/package.json` and re-release
+- If tag doesn't exist: Tag was deleted or never pushed
+
+### Users Report "ia32" or "x86" Error
+
+**Cause:** User has 32-bit Node.js installed on 64-bit system.
+
+**Solution (for users):**
+1. Uninstall 32-bit Node.js
+2. Install 64-bit Node.js from [nodejs.org](https://nodejs.org/)
+3. Reinstall flowstate-cli
+
+**Prevention:** The install script now shows helpful error message for 32-bit architectures.
+
+### Linux Users Can't Run `flowstate` After Install
+
+**Cause:** npm global bin directory not in PATH.
+
+**Solution (for users):**
+```bash
+# Quick fix: use npx
+npx flowstate
+
+# Permanent fix: add to PATH
+echo 'export PATH="$(npm config get prefix)/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Prevention:** The install script now shows PATH setup instructions on Linux.
+
+## Manual Release (Backup Method)
+
+If GitHub Actions is unavailable, you can release manually:
+
+<Steps>
+  <Step title="Build binaries locally">
+    ```bash
+    export GITHUB_TOKEN=your_token
+    goreleaser release --clean
+    ```
+    
+    This builds all binaries and creates the GitHub Release.
+  </Step>
+  
+  <Step title="Publish to npm">
+    ```bash
+    cd npm
+    npm publish
+    ```
+    
+    Requires `NPM_TOKEN` or being logged in via `npm login`.
+  </Step>
+</Steps>
+
+<Warning>
+Manual releases are error-prone. Only use if CI/CD is broken.
+</Warning>
+
+## Post-Release Checklist
+
+<Steps>
+  <Step title="Announce the release">
+    - Update GitHub Releases description with changelog
+    - Tweet/post on social media (if applicable)
+    - Update any external documentation
+  </Step>
+  
+  <Step title="Monitor for issues">
+    Watch for:
+    - GitHub Issues reporting installation failures
+    - npm download stats
+    - User feedback in Discussions
+  </Step>
+  
+  <Step title="Update development docs">
+    - Mark phase as complete in `CLAUDE.md`
+    - Update roadmap if necessary
+    - Plan next release
+  </Step>
+</Steps>
+
+## Release History
+
+Recent releases (see [full changelog](https://github.com/Jericoz-JC/flowState-CLI/releases)):
+
+| Version | Date | Highlights |
+|---------|------|------------|
+| v0.1.13 | Jan 2026 | Screen consistency, help modals for all screens |
+| v0.1.12 | Jan 2026 | Component library (spinner, ASCII headers) |
+| v0.1.11 | Jan 2026 | Focus screen visual overhaul |
+| v0.1.10 | Jan 2026 | npm install fixes (ia32, Linux PATH) |
+| v0.1.9  | Jan 2026 | Notes system overhaul (tagging engine) |
+
+<Note>
+For the complete phase-by-phase development history, see `CLAUDE.md` in the source repository.
+</Note>

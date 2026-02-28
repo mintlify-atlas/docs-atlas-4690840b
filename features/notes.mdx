@@ -1,0 +1,362 @@
+---
+title: 'Notes System'
+description: 'Create, organize, and connect your notes with markdown support, wikilinks, and tagging'
+---
+
+## Overview
+
+The Notes system in flowState CLI is designed for fast, frictionless knowledge capture. Notes support markdown formatting, bidirectional wikilinks, and automatic tag extraction from hashtags.
+
+<Note>
+  Notes are stored locally in SQLite and support semantic search through ONNX embeddings.
+</Note>
+
+## Creating Notes
+
+You can create notes in several ways:
+
+<Steps>
+  <Step title="From the Notes screen">
+    Press **c** to open the create form. Enter a title, press Tab to switch to the body, then press Ctrl+S or Enter (from title field) to save.
+  </Step>
+  
+  <Step title="Quick Capture">
+    Press **Ctrl+X** from anywhere in the app to instantly capture a note without leaving your current screen.
+  </Step>
+  
+  <Step title="From Wikilinks">
+    Reference a note that doesn't exist yet using `[[Note Title]]` syntax. flowState will create a placeholder note automatically when you save.
+  </Step>
+</Steps>
+
+### Keyboard Shortcuts (Create/Edit Mode)
+
+| Key | Action |
+|-----|--------|
+| **Tab** | Switch between title and body fields |
+| **Enter** | Save (when in title) / New line (when in body) |
+| **Ctrl+S** | Save note |
+| **Ctrl+E** | Toggle markdown preview |
+| **Ctrl+B** | Insert bold formatting (`****`) |
+| **Ctrl+I** | Insert italic formatting (`**`) |
+| **Ctrl+G** | Open tag picker to add existing tags |
+| **Esc** | Cancel and return to list |
+
+<Tip>
+  Press **Tab** to switch between title and body. When editing the body, the title label hides automatically for a cleaner writing experience.
+</Tip>
+
+## Markdown Support
+
+Notes support GitHub-flavored markdown with live preview:
+
+<Tabs>
+  <Tab title="Headers">
+    ```markdown
+    # Header 1
+    ## Header 2
+    ### Header 3
+    ```
+  </Tab>
+  
+  <Tab title="Formatting">
+    ```markdown
+    **bold text**
+    *italic text*
+    `inline code`
+    ```
+  </Tab>
+  
+  <Tab title="Lists">
+    ```markdown
+    - Bullet list item
+    * Another item
+    
+    - [ ] Unchecked task
+    - [x] Completed task
+    ```
+  </Tab>
+  
+  <Tab title="Links">
+    ```markdown
+    [[Another Note]]  # Wikilink
+    #projectname      # Hashtag
+    @mention          # Mention (also becomes a tag)
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  Press **Ctrl+E** while editing to toggle between edit mode and markdown preview mode.
+</Note>
+
+## Wikilinks
+
+Wikilinks create bidirectional connections between notes using `[[Note Title]]` syntax.
+
+<Accordion title="How Wikilinks Work">
+  When you save a note containing `[[Another Note]]`:
+  
+  1. flowState searches for a note with that exact title (case-insensitive)
+  2. If found, it creates a link between the two notes
+  3. If not found, it creates a placeholder note with the tag `#placeholder`
+  4. Links are stored in the `links` table as bidirectional relationships
+  
+  **Example:**
+  ```markdown
+  # Project Planning
+  
+  See [[Meeting Notes]] for discussion.
+  Related to [[Design Mockups]].
+  ```
+  
+  This creates links to both "Meeting Notes" and "Design Mockups". You can view all links using **Ctrl+L** or explore the Mind Map with **Ctrl+G**.
+</Accordion>
+
+<Warning>
+  Wikilinks match note titles exactly. `[[meeting notes]]` and `[[Meeting Notes]]` refer to the same note.
+</Warning>
+
+## Tagging System
+
+Tags are automatically extracted from both the title and body using `#hashtag` or `@mention` syntax.
+
+### Auto-Tagging
+
+Tags are extracted when you save a note:
+
+```markdown
+Title: Project Update #work
+
+Body:
+Discussed @team priorities for #q1 #planning
+```
+
+This note will have tags: `work`, `team`, `q1`, `planning`
+
+<Note>
+  Tags are normalized: lowercased, trailing punctuation removed, and deduplicated.
+</Note>
+
+### Quick-Tag Picker
+
+Press **Ctrl+G** while editing a note to open the Quick-Tag picker:
+
+<Steps>
+  <Step title="Open the picker">
+    Press **Ctrl+G** (or **Alt+G**) while editing
+  </Step>
+  
+  <Step title="Select tags">
+    Use **↑/↓** or **j/k** to navigate, **Space** to toggle selection
+  </Step>
+  
+  <Step title="Apply">
+    Press **Enter** to append selected tags to your note body
+  </Step>
+</Steps>
+
+### Tag Filtering
+
+From the Notes list:
+
+| Key | Action |
+|-----|--------|
+| **t** | Open tag filter picker |
+| **Space** | Toggle tag selection (multi-select) |
+| **Enter** | Apply tag filter |
+| **Ctrl+R** | Reset all filters |
+
+<Tip>
+  You can filter by multiple tags. The tag picker shows all tags across all notes with checkboxes for multi-select.
+</Tip>
+
+## Viewing & Organizing Notes
+
+### List Navigation
+
+| Key | Action |
+|-----|--------|
+| **j/k** or **↓/↑** | Move selection up/down |
+| **p** | Preview selected note (read-only) |
+| **e** | Edit selected note |
+| **d** | Delete selected note (with confirmation) |
+| **/** | Open search filter |
+| **s** | Cycle sort mode |
+
+### Sort Modes
+
+Press **s** to cycle through:
+
+1. **Date↓** - Newest first (default)
+2. **Title** - Alphabetical by title
+3. **Date↑** - Oldest first
+
+### Preview Mode
+
+Press **p** to open a note in read-only preview mode:
+
+- Markdown is rendered with syntax highlighting
+- Wikilinks are underlined and color-coded
+- Tags are displayed as colored badges
+- Press **e** to edit directly from preview
+- Press **Esc** to close
+
+<Accordion title="Preview Mode Features">
+  Preview mode shows:
+  
+  - **Title** in large styled text
+  - **Updated date** with timestamp
+  - **Tags** as colored badges
+  - **Body** with markdown rendering:
+    - Headers styled by level
+    - Bold/italic/code formatting
+    - Wikilinks highlighted
+    - Checkboxes rendered as ✓/☐
+  
+  **Keyboard shortcuts in preview:**
+  - **e** - Edit note
+  - **Esc**, **p**, or **q** - Close preview
+</Accordion>
+
+## Search & Filtering
+
+### Text Search
+
+Press **/** to open the search filter:
+
+- Searches both title and body
+- Live search-as-you-type
+- Press **Enter** to keep filter, **Esc** to clear
+
+### Combined Filters
+
+You can combine multiple filters:
+
+```
+🔎 Filtering: search:"project" #work #urgent [Ctrl+R to reset]
+```
+
+Active filters:
+- **Text search** - Matches title or body
+- **Tag filter** - Must have all selected tags
+- **Sort mode** - Applied after filtering
+
+<Tip>
+  Press **Ctrl+R** to instantly reset all filters and return to the full note list.
+</Tip>
+
+## Code Examples
+
+### Note Data Structure
+
+From `internal/models/models.go:34-41`:
+
+```go
+type Note struct {
+    ID        int64     `json:"id"`
+    Title     string    `json:"title"`
+    Body      string    `json:"body"`
+    Tags      []string  `json:"tags"`
+    CreatedAt time.Time `json:"created_at"`
+    UpdatedAt time.Time `json:"updated_at"`
+}
+```
+
+### Tag Extraction
+
+From `internal/tui/screens/notes.go:1211-1237`:
+
+```go
+func extractTags(content string) []string {
+    tags := make(map[string]struct{})
+    words := strings.Fields(content)
+    for _, word := range words {
+        // Handle #hashtag
+        if strings.HasPrefix(word, "#") {
+            tag := strings.TrimPrefix(word, "#")
+            tag = cleanTag(tag)
+            if tag != "" {
+                tags[tag] = struct{}{}
+            }
+        }
+        // Handle @mention
+        if strings.HasPrefix(word, "@") {
+            tag := strings.TrimPrefix(word, "@")
+            tag = cleanTag(tag)
+            if tag != "" {
+                tags[tag] = struct{}{}
+            }
+        }
+    }
+    // ...
+}
+```
+
+### Wikilink Parsing
+
+From `internal/tui/screens/notes.go:1124-1147`:
+
+```go
+func parseWikilinks(text string) []string {
+    links := []string{}
+    inLink := false
+    linkStart := 0
+
+    for i := 0; i < len(text); i++ {
+        if i < len(text)-1 && text[i] == '[' && text[i+1] == '[' {
+            if !inLink {
+                inLink = true
+                linkStart = i + 2
+                i++
+            }
+        } else if i < len(text)-1 && text[i] == ']' && text[i+1] == ']' && inLink {
+            linkText := strings.TrimSpace(text[linkStart:i])
+            if linkText != "" {
+                links = append(links, linkText)
+            }
+            inLink = false
+            i++
+        }
+    }
+    return links
+}
+```
+
+## Best Practices
+
+<Accordion title="Efficient Note-Taking Workflow">
+  1. **Quick Capture First** - Press Ctrl+X to dump thoughts immediately
+  2. **Refine Later** - Add tags, wikilinks, and formatting during review
+  3. **Use Wikilinks Liberally** - Don't worry if the note doesn't exist yet
+  4. **Tag Consistently** - Use the tag picker (Ctrl+G) to avoid typos
+  5. **Preview Before Editing** - Press 'p' to read, 'e' only when changing
+</Accordion>
+
+<Accordion title="Tagging Strategies">
+  - **Projects**: `#projectname` for all related notes
+  - **Status**: `#draft`, `#review`, `#complete`
+  - **Topics**: `#design`, `#backend`, `#research`
+  - **People**: `@alice`, `@bob` for mentions
+  - **Time**: `#q1`, `#2025`, `#jan`
+</Accordion>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Linking System" icon="link" href="/features/linking">
+    Connect notes and todos with bidirectional links
+  </Card>
+  
+  <Card title="Mind Map" icon="diagram-project" href="/features/mind-map">
+    Visualize your note connections as a graph
+  </Card>
+  
+  <Card title="Semantic Search" icon="magnifying-glass" href="/features/search">
+    Find notes using natural language queries
+  </Card>
+  
+  <Card title="Quick Capture" icon="bolt" href="/features/quick-capture">
+    Instant note creation from anywhere
+  </Card>
+</CardGroup>

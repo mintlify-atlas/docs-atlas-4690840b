@@ -1,0 +1,360 @@
+---
+title: Mind Map Visualization
+description: Navigate your knowledge graph with an interactive visual mind map
+icon: "diagram-project"
+---
+
+## Overview
+
+The Mind Map screen transforms your notes and their connections into an interactive visual graph. See the big picture of your knowledge base, discover clusters of related topics, and navigate your notes spatially.
+
+<Info>
+Press `Ctrl+G` from anywhere in flowState to open the Mind Map.
+</Info>
+
+## What is the Mind Map?
+
+The Mind Map is an ASCII-rendered graph visualization that shows:
+
+- **Nodes**: Each note appears as a node in the graph
+- **Edges**: Lines connecting linked notes (based on your bidirectional links)
+- **Colors**: Nodes are colored by tag to show thematic grouping
+- **Size**: Node size reflects the number of connections (more links = larger node)
+- **Clusters**: Related notes naturally group together visually
+
+<Tip>
+The Mind Map uses a force-directed layout algorithm to position nodes based on their connections. Highly connected notes move toward the center, while isolated notes appear at the edges.
+</Tip>
+
+## Opening the Mind Map
+
+<Steps>
+  <Step title="Navigate to Mind Map">
+    Press `Ctrl+G` from any screen to open the Mind Map view
+  </Step>
+  <Step title="Wait for Graph Render">
+    flowState calculates node positions based on your links and note tags
+  </Step>
+  <Step title="Explore Your Knowledge Graph">
+    Use keyboard navigation to explore and interact with your notes
+  </Step>
+</Steps>
+
+## Navigation
+
+### Keyboard Controls
+
+<CardGroup cols={2}>
+  <Card title="Pan the View" icon="arrows-up-down-left-right">
+    **h/j/k/l** or **Arrow Keys**
+    
+    Move the selection focus to adjacent nodes
+    
+    - `h` / `←`: Move left
+    - `j` / `↓`: Move down
+    - `k` / `↑`: Move up
+    - `l` / `→`: Move right
+  </Card>
+  
+  <Card title="Zoom" icon="magnifying-glass">
+    **+** / **-** or **Scroll**
+    
+    - `+` or `=`: Zoom in (increase detail)
+    - `-`: Zoom out (see more nodes)
+    - Zoom range: 1x to 3x
+  </Card>
+  
+  <Card title="Open Notes" icon="book-open">
+    **Enter**
+    
+    Open the currently selected note in the notes editor
+  </Card>
+  
+  <Card title="Return to Notes" icon="arrow-left">
+    **Esc**
+    
+    Exit Mind Map and return to notes list
+  </Card>
+</CardGroup>
+
+### Selection Indicator
+
+The currently selected node is highlighted in **cyan (#5ffbf1)** - the ARCHWAVE neon accent color. Use `h`/`j`/`k`/`l` to move the selection to adjacent nodes.
+
+## Visual Elements
+
+### Nodes
+
+Each note in your knowledge base appears as a node with:
+
+- **Label**: The note title (truncated if too long)
+- **Color**: Based on the note's primary tag
+- **Size**: Proportional to the number of connections
+- **Position**: Calculated by force-directed layout based on links
+
+<Note>
+Nodes with more connections (high degree centrality) appear larger and tend to position near the center of the graph.
+</Note>
+
+### Edges
+
+Lines connecting nodes represent bidirectional links created through:
+
+- Manual links (`Ctrl+L` in notes or todos)
+- Wikilinks (`[[Note Title]]` syntax in note body)
+
+<Tip>
+The strength and proximity of connections affects the layout. Tightly connected note clusters will appear closer together.
+</Tip>
+
+### Color Coding
+
+Nodes are colored based on tags:
+
+- **Tagged notes**: Color derived from the note's tags
+- **Untagged notes**: Default color
+- **Selected node**: Always highlighted in cyan, regardless of tag color
+
+### Node Sizing
+
+Node size indicates connection count:
+
+- **Small nodes**: Few or no connections (isolated notes)
+- **Medium nodes**: Several connections (well-integrated)
+- **Large nodes**: Many connections (central hub notes)
+
+## Understanding the Layout
+
+### Force-Directed Graph
+
+The Mind Map uses a force-directed algorithm to position nodes:
+
+1. **Attraction**: Linked notes pull toward each other
+2. **Repulsion**: All nodes push away from each other
+3. **Equilibrium**: The layout settles where forces balance
+
+<Info>
+This creates natural clustering - notes on the same topic (with similar links) group together visually.
+</Info>
+
+### Interpreting Clusters
+
+Look for visual patterns in your Mind Map:
+
+- **Dense clusters**: Highly interconnected topics (projects, research areas)
+- **Bridge nodes**: Notes connecting multiple clusters (cross-cutting concepts)
+- **Isolated nodes**: Standalone notes with few connections
+- **Star patterns**: Central hub notes with many connections radiating out
+
+## Use Cases
+
+### Discovering Connections
+
+Use the Mind Map to find unexpected relationships:
+
+```
+Scenario: You notice two clusters positioned close together
+Action: Explore why - do they share tags? Hidden connections?
+Result: Discover related topics you hadn't explicitly linked
+```
+
+### Identifying Knowledge Gaps
+
+Look for isolated nodes or sparse areas:
+
+- Isolated notes might need more context or links
+- Sparse areas could indicate under-developed topics
+- Dense clusters might need organization or splitting
+
+### Project Overview
+
+Visualize project structure at a glance:
+
+```
+Project: "Website Redesign"
+├── Connected to design notes (cluster on left)
+├── Connected to implementation tasks (cluster on right)
+└── Hub note linking both clusters (center)
+```
+
+### Knowledge Base Health
+
+Assess your knowledge graph structure:
+
+- **Well-connected**: Most notes have 2-5 connections
+- **Balanced**: Mix of hub notes and specialized notes  
+- **Clustered**: Clear topic groupings with some bridges
+
+## Keyboard Reference
+
+<Info>
+Press `?` while in the Mind Map to see contextual help.
+</Info>
+
+| Key | Action |
+|-----|--------|
+| `h` / `←` | Pan left / Select left node |
+| `j` / `↓` | Pan down / Select lower node |
+| `k` / `↑` | Pan up / Select upper node |
+| `l` / `→` | Pan right / Select right node |
+| `+` or `=` | Zoom in (max 3x) |
+| `-` | Zoom out (min 1x) |
+| `Enter` | Open selected note in editor |
+| `Esc` | Return to notes list |
+| `?` | Show help modal |
+| `Ctrl+H` | Return to home screen |
+
+## Tips for Effective Mind Mapping
+
+<Tip>
+**Create intentional links**: The Mind Map is only as useful as your linking strategy. Link related notes to see meaningful clusters.
+</Tip>
+
+### Best Practices
+
+1. **Start with hub notes**: Create central notes for major topics and link related notes to them
+2. **Use consistent tagging**: Tags affect node coloring - consistent tags create clear visual grouping
+3. **Review regularly**: Open the Mind Map weekly to spot gaps or over-connections
+4. **Follow the clusters**: If notes cluster unexpectedly, investigate why
+5. **Don't over-link**: Too many links create visual noise and reduce meaning
+
+### Building a Useful Graph
+
+<Steps>
+  <Step title="Create core notes">
+    Write notes for your main topics, projects, or areas of focus
+  </Step>
+  <Step title="Add connections">
+    Link related notes using `Ctrl+L` or wikilinks `[[Note Title]]`
+  </Step>
+  <Step title="Tag consistently">
+    Use tags like `#project`, `#research`, `#ideas` to color-code nodes
+  </Step>
+  <Step title="Check the Mind Map">
+    Open `Ctrl+G` to see your graph structure
+  </Step>
+  <Step title="Refine">
+    Add missing links, remove unnecessary connections, create bridge notes
+  </Step>
+</Steps>
+
+## Zoom Levels
+
+The Mind Map supports 3 zoom levels:
+
+- **1x (default)**: Balanced view showing most of your graph
+- **2x**: Closer view with more detail on node labels
+- **3x (max)**: Zoomed view for examining specific clusters
+
+<Note>
+Zoom affects the layout space calculation. The graph recalculates node positions when you change zoom level.
+</Note>
+
+## Technical Details
+
+### Graph Construction
+
+The Mind Map is built from:
+
+1. **Links table**: All bidirectional links between notes
+2. **Notes table**: Note titles used as node labels
+3. **Tags**: Used for node coloring and clustering hints
+
+### Rendering
+
+The graph is rendered as ASCII art using:
+
+- Box-drawing characters for edges
+- Node labels with color codes
+- Canvas size based on terminal dimensions
+
+<Info>
+The Mind Map adapts to your terminal size. Larger terminals show more of the graph at once.
+</Info>
+
+### Performance
+
+Graph calculation is optimized for up to ~500 notes. Beyond that:
+
+- Layout calculation may take a few seconds
+- Consider filtering by tag or creating sub-graphs
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Mind Map is empty or shows few nodes">
+    - Ensure you have notes created in the Notes screen
+    - Verify notes have links (use `Ctrl+L` to create links)
+    - Only notes with at least one link appear in the graph
+    - Check if you have any wikilinks `[[Note Title]]` in note bodies
+  </Accordion>
+  
+  <Accordion title="Can't see all my nodes">
+    - Try zooming out with `-` to see more of the graph
+    - Increase your terminal size for a larger canvas
+    - Use `h`/`j`/`k`/`l` to pan and explore different areas
+  </Accordion>
+  
+  <Accordion title="Navigation feels random">
+    - Navigation moves to the nearest node in the direction you press
+    - If nodes are scattered, direction may feel unintuitive
+    - Try zooming in or creating more links for better clustering
+  </Accordion>
+  
+  <Accordion title="Graph layout looks messy">
+    - Force-directed layouts can appear chaotic with many nodes
+    - Try creating fewer, more intentional links
+    - Use tags to create visual grouping
+    - Consider filtering to a subset of notes (future feature)
+  </Accordion>
+</AccordionGroup>
+
+## Workflow Integration
+
+### Daily Review
+
+```
+1. Open Mind Map (Ctrl+G)
+2. Look for new clusters or isolated notes
+3. Add missing connections
+4. Navigate to notes that need attention
+```
+
+### Project Planning
+
+```
+1. Create project hub note
+2. Link all related notes and tasks
+3. View in Mind Map to see structure
+4. Identify missing pieces or gaps
+```
+
+### Knowledge Discovery
+
+```
+1. Search for a topic (Ctrl+/)
+2. Open result in Mind Map (Ctrl+G)
+3. Explore connected notes visually
+4. Discover related concepts through clustering
+```
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Bidirectional Linking" icon="link" href="/features/linking">
+    Learn how to create the connections that power the Mind Map
+  </Card>
+  <Card title="Semantic Search" icon="magnifying-glass" href="/features/semantic-search">
+    Find notes by meaning, then visualize connections in the Mind Map
+  </Card>
+</CardGroup>
+
+## Future Enhancements
+
+Planned improvements for the Mind Map:
+
+- **Tag filtering**: Show only nodes with specific tags
+- **Search integration**: Highlight search results in the graph
+- **Layout persistence**: Save and restore custom layouts
+- **Export**: Save graph as SVG or PNG image
+- **Interaction**: Click nodes to open (in GUI version)

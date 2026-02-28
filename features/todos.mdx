@@ -1,0 +1,434 @@
+---
+title: 'Todo Management'
+description: 'Track tasks with priorities, due dates, status tracking, and powerful filtering'
+---
+
+## Overview
+
+flowState's Todo system helps you manage tasks with Notion-inspired features: priority levels, status tracking, due dates, tagging, and multiple sort/filter modes.
+
+<Note>
+  Todos integrate seamlessly with notes through the linking system. Attach a todo to a note to keep context close.
+</Note>
+
+## Creating Todos
+
+<Steps>
+  <Step title="Open create form">
+    Press **c** from the Todos screen to open the create form.
+  </Step>
+  
+  <Step title="Enter title">
+    Type your todo title. The title field is focused by default.
+  </Step>
+  
+  <Step title="Add description (optional)">
+    Press **Tab** to move to the description field. Add details, use `#hashtags` for tags.
+  </Step>
+  
+  <Step title="Save">
+    Press **Ctrl+S** or **Enter** (from title field) to save with default priority (Medium) and status (Pending).
+  </Step>
+</Steps>
+
+### Keyboard Shortcuts (Create/Edit Mode)
+
+| Key | Action |
+|-----|--------|
+| **Tab** | Switch between title and description fields |
+| **Ctrl+S** | Save todo |
+| **Enter** | Save (when in title) / New line (when in description) |
+| **Esc** | Cancel and return to list |
+
+<Tip>
+  Press **Enter** while in the title field to save quickly. When in the description field, Enter creates a new line.
+</Tip>
+
+## Status Tracking
+
+Todos have three status states:
+
+<Tabs>
+  <Tab title="Pending">
+    **Symbol:** ○ (hollow circle)
+    
+    Default status for new todos. Tasks not yet started.
+    
+    **Badge color:** Yellow
+  </Tab>
+  
+  <Tab title="In Progress">
+    **Symbol:** ◐ (half circle)
+    
+    Tasks currently being worked on.
+    
+    **Badge color:** Cyan
+    
+    <Note>
+      Toggle with Space bar: Pending → In Progress → Completed → Pending
+    </Note>
+  </Tab>
+  
+  <Tab title="Completed">
+    **Symbol:** ✓ (checkmark)
+    
+    Finished tasks.
+    
+    **Badge color:** Green
+  </Tab>
+</Tabs>
+
+### Status Operations
+
+| Key | Action |
+|-----|--------|
+| **Space** | Toggle status (cycles through all three) |
+| **f** | Filter by status (cycles: All → Pending → In Progress → Completed) |
+
+## Priority Levels
+
+Three priority levels help you focus on what matters:
+
+<CardGroup cols={3}>
+  <Card title="High" icon="circle" color="#ff6b6b">
+    Urgent/important tasks
+    
+    **Indicator:** 🔴
+    
+    **Default:** No
+  </Card>
+  
+  <Card title="Medium" icon="circle" color="#ffd93d">
+    Normal priority tasks
+    
+    **Indicator:** (none)
+    
+    **Default:** Yes
+  </Card>
+  
+  <Card title="Low" icon="circle" color="#6bcf7f">
+    Minor tasks
+    
+    **Indicator:** 🟢
+    
+    **Default:** No
+  </Card>
+</CardGroup>
+
+### Priority Filtering
+
+Press **p** to cycle through priority filters:
+
+1. **All** - Show all priorities
+2. **High** - Only high priority
+3. **Medium** - Only medium priority
+4. **Low** - Only low priority
+
+<Note>
+  Priority values in code: Low = 0, Medium = 1, High = 2. Filter uses -1 for "all".
+</Note>
+
+## Due Dates
+
+Due dates show relative time indicators:
+
+| Indicator | Meaning |
+|-----------|----------|
+| ⚠️ | **Overdue** - Due date has passed |
+| 📅 | **Due today** - Due within 24 hours |
+| ⏰ | **Due soon** - Due within 3 days |
+
+<Accordion title="Due Date Display Examples">
+  In the todo list:
+  ```
+  ✓ Complete documentation 🔴 📅
+  ○ Review pull requests ⏰
+  ◐ Fix login bug ⚠️
+  ```
+  
+  In preview mode:
+  ```
+  Due Date: Jan 15, 2026 (in 2 days)
+  Due Date: Jan 10, 2026 (overdue by 3 days)
+  Due Date: Jan 13, 2026 (today!)
+  ```
+</Accordion>
+
+## Tagging
+
+Todos support `#hashtag` tagging in both the title and description.
+
+### Auto-Tag Extraction
+
+Tags are extracted when you save:
+
+```
+Title: Deploy staging environment #devops
+
+Description:
+Need to update configs for #docker and #nginx
+Tag @alice for review
+```
+
+Extracted tags: `devops`, `docker`, `nginx`, `alice`
+
+<Note>
+  Both `#hashtag` and `@mention` syntax create tags. Tags are normalized to lowercase.
+</Note>
+
+### Tag Filtering
+
+Press **t** to cycle through tag filters:
+
+- First press: Filter by first tag
+- Subsequent presses: Cycle through all tags
+- After last tag: Clear filter (show all)
+
+<Tip>
+  You can filter by multiple tags and other criteria simultaneously. Press **Ctrl+R** to reset all filters.
+</Tip>
+
+## Sorting & Filtering
+
+### Sort Modes
+
+Press **s** to cycle through 5 sort modes:
+
+<Tabs>
+  <Tab title="Date↓">
+    **Newest first** (default)
+    
+    Sorts by creation date descending. Most recently created todos appear first.
+  </Tab>
+  
+  <Tab title="Priority">
+    **High priority first**
+    
+    Sorts by priority level: High → Medium → Low. Within same priority, sorted by date descending.
+  </Tab>
+  
+  <Tab title="Date↑">
+    **Oldest first**
+    
+    Sorts by creation date ascending. Oldest todos appear first.
+  </Tab>
+  
+  <Tab title="A-Z">
+    **Alphabetical**
+    
+    Sorts by title alphabetically (case-insensitive).
+  </Tab>
+  
+  <Tab title="Due Date">
+    **Earliest due date first**
+    
+    Sorts by due date. Todos without due dates appear last.
+  </Tab>
+</Tabs>
+
+### Combined Filtering
+
+You can combine multiple filters:
+
+```
+🔎 search:"login" • status:in_progress • priority:High • tag:#bug [Ctrl+R reset]
+```
+
+Filter types:
+- **Text search** - Press `/` (searches title and description)
+- **Status filter** - Press `f`
+- **Priority filter** - Press `p`
+- **Tag filter** - Press `t`
+
+<Warning>
+  Filters are applied in order: search → status → priority → tag. Results must match ALL active filters.
+</Warning>
+
+## Preview Mode
+
+Press **v** to view full todo details:
+
+<Accordion title="Preview Mode Layout">
+  **Header:**
+  - Todo title (large, bold)
+  - Status badge (PENDING / IN PROGRESS / COMPLETED)
+  - Priority badge (HIGH / MEDIUM / LOW)
+  
+  **Tags:**
+  - Colored tag badges if present
+  
+  **Description:**
+  - Full description text (or "No description")
+  
+  **Metadata:**
+  - Created date
+  - Due date (with relative time)
+  
+  **Actions:**
+  - **e** - Edit
+  - **d** - Delete
+  - **Esc** - Close
+</Accordion>
+
+## Keyboard Shortcuts Reference
+
+### List View
+
+| Key | Action |
+|-----|--------|
+| **c** | Create new todo |
+| **e** | Edit selected todo |
+| **v** | Preview todo details |
+| **d** | Delete selected todo (with confirmation) |
+| **Space** | Toggle todo completion status |
+| **s** | Cycle sort mode |
+| **f** | Cycle status filter |
+| **p** | Cycle priority filter |
+| **t** | Cycle tag filter |
+| **/** | Open text search filter |
+| **Ctrl+R** | Reset all filters |
+| **Ctrl+L** | Open linking modal |
+| **j/k** or **↓/↑** | Move selection |
+| **?** | Show help modal |
+
+## Code Examples
+
+### Todo Data Structure
+
+From `internal/models/models.go:71-97`:
+
+```go
+type Todo struct {
+    ID          int64        `json:"id"`
+    Title       string       `json:"title"`
+    Description string       `json:"description"`
+    Status      TodoStatus   `json:"status"`
+    Priority    TodoPriority `json:"priority"`
+    DueDate     *time.Time   `json:"due_date,omitempty"`
+    NoteID      *int64       `json:"note_id,omitempty"`
+    CreatedAt   time.Time    `json:"created_at"`
+    UpdatedAt   time.Time    `json:"updated_at"`
+}
+
+const (
+    TodoStatusPending    TodoStatus = "pending"
+    TodoStatusInProgress TodoStatus = "in_progress"
+    TodoStatusCompleted  TodoStatus = "completed"
+)
+
+const (
+    TodoPriorityLow    TodoPriority = 0
+    TodoPriorityMedium TodoPriority = 1
+    TodoPriorityHigh   TodoPriority = 2
+)
+```
+
+### Tag Extraction
+
+From `internal/tui/screens/todos.go:72-87`:
+
+```go
+var tagPattern = regexp.MustCompile(`#(\w+)`)
+
+func extractTagsFromTodo(todo *models.Todo) []string {
+    text := todo.Title + " " + todo.Description
+    matches := tagPattern.FindAllStringSubmatch(text, -1)
+    seen := make(map[string]bool)
+    var tags []string
+    for _, match := range matches {
+        if len(match) > 1 {
+            tag := strings.ToLower(match[1])
+            if !seen[tag] {
+                seen[tag] = true
+                tags = append(tags, tag)
+            }
+        }
+    }
+    return tags
+}
+```
+
+### Sort Implementation
+
+From `internal/tui/screens/todos.go:280-316`:
+
+```go
+switch m.sortMode {
+case TodoSortByDate:
+    sort.Slice(filtered, func(i, j int) bool {
+        return filtered[i].CreatedAt.After(filtered[j].CreatedAt)
+    })
+case TodoSortByPriority:
+    sort.Slice(filtered, func(i, j int) bool {
+        // Higher priority first
+        if filtered[i].Priority != filtered[j].Priority {
+            return filtered[i].Priority > filtered[j].Priority
+        }
+        // Same priority: sort by date descending
+        return filtered[i].CreatedAt.After(filtered[j].CreatedAt)
+    })
+case TodoSortByDueDate:
+    sort.Slice(filtered, func(i, j int) bool {
+        // Nil due dates go to the end
+        if filtered[i].DueDate == nil && filtered[j].DueDate == nil {
+            return filtered[i].CreatedAt.After(filtered[j].CreatedAt)
+        }
+        if filtered[i].DueDate == nil {
+            return false
+        }
+        if filtered[j].DueDate == nil {
+            return true
+        }
+        return filtered[i].DueDate.Before(*filtered[j].DueDate)
+    })
+}
+```
+
+## Best Practices
+
+<Accordion title="Effective Todo Management">
+  1. **Use Priorities Wisely** - Reserve High for truly urgent tasks
+  2. **Tag Consistently** - Use project tags (`#project-x`) to group related todos
+  3. **Set Due Dates** - Use the due date indicators to stay on top of deadlines
+  4. **Link to Notes** - Attach todos to meeting notes or design docs for context
+  5. **Review Regularly** - Use sort by Due Date to see what's coming up
+</Accordion>
+
+<Accordion title="Tagging Strategies">
+  - **Projects**: `#project-alpha`, `#client-work`
+  - **Categories**: `#bug`, `#feature`, `#chore`
+  - **Teams**: `@frontend`, `@backend`, `@design`
+  - **Sprints**: `#sprint-15`, `#q1-2026`
+</Accordion>
+
+<Accordion title="Workflow Tips">
+  **Daily Review:**
+  1. Press `f` to filter by "Pending"
+  2. Press `s` to sort by "Due Date"
+  3. Mark urgent items with Space → In Progress
+  
+  **Weekly Planning:**
+  1. Press `p` to filter by "High" priority
+  2. Add due dates to high-priority items
+  3. Tag todos by project for grouping
+</Accordion>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Linking System" icon="link" href="/features/linking">
+    Connect todos to related notes for context
+  </Card>
+  
+  <Card title="Notes" icon="note-sticky" href="/features/notes">
+    Attach detailed planning notes to todos
+  </Card>
+  
+  <Card title="Quick Capture" icon="bolt" href="/features/quick-capture">
+    Create todos instantly with Ctrl+X
+  </Card>
+  
+  <Card title="Search" icon="magnifying-glass" href="/features/search">
+    Find todos using semantic search
+  </Card>
+</CardGroup>

@@ -1,0 +1,342 @@
+---
+title: Commands
+description: Main command and screen navigation reference for flowState CLI
+---
+
+## Main Command
+
+flowState is a single binary with no subcommands. The TUI launches immediately when you run the executable.
+
+<CodeGroup>
+```bash Linux/macOS
+./flowstate
+```
+
+```bash Windows
+.\flowstate.exe
+```
+
+```bash npm (all platforms)
+flowstate
+```
+
+```bash Go Install
+go install github.com/Jericoz-JC/flowState-CLI/cmd/flowState@latest
+```
+</CodeGroup>
+
+### First Run
+
+On first run, flowState will:
+
+1. Initialize SQLite database at `~/.config/flowState/flowState.db`
+2. Download the embedding model (~90MB) to `~/.config/flowState/models/`
+3. Launch the TUI interface with home screen
+
+<Info>
+The application logs debug output to `debug.log` in the working directory.
+</Info>
+
+## Navigation Shortcuts
+
+flowState uses keyboard shortcuts to navigate between screens. All shortcuts work globally from any screen.
+
+### Global Navigation
+
+<ParamField path="Ctrl+X" type="shortcut">
+  **Quick Capture** - Open quick note capture modal from anywhere
+</ParamField>
+
+<ParamField path="Ctrl+N" type="shortcut">
+  **Notes Screen** - View and manage your notes
+</ParamField>
+
+<ParamField path="Ctrl+T" type="shortcut">
+  **Todos Screen** - View and manage your tasks
+</ParamField>
+
+<ParamField path="Ctrl+F" type="shortcut">
+  **Focus Screen** - Start Pomodoro-style focus sessions
+</ParamField>
+
+<ParamField path="Ctrl+/" type="shortcut">
+  **Search Screen** - Semantic search across all notes
+</ParamField>
+
+<ParamField path="Ctrl+G" type="shortcut">
+  **Mind Map** - Visual graph of notes and connections
+</ParamField>
+
+<ParamField path="Ctrl+L" type="shortcut">
+  **Link Modal** - Create/view links for selected note or todo
+</ParamField>
+
+<ParamField path="Ctrl+H" type="shortcut">
+  **Home Screen** - Return to home/help screen (highest priority navigation)
+</ParamField>
+
+<ParamField path="?" type="shortcut">
+  **Help Modal** - Context-sensitive help for current screen
+</ParamField>
+
+<ParamField path="Esc" type="shortcut">
+  **Go Back / Cancel** - Close modals, cancel actions, exit edit mode
+</ParamField>
+
+<ParamField path="q" type="shortcut">
+  **Quit Application** - Exit flowState (also Ctrl+C)
+</ParamField>
+
+<Note>
+On macOS, `Ctrl` is used (not `Cmd`). This ensures cross-platform consistency.
+</Note>
+
+### Screen-Specific Shortcuts
+
+Each screen has its own set of shortcuts. Press `?` within any screen to see context-sensitive help.
+
+<Expandable title="Notes Screen Shortcuts">
+  <ParamField path="c" type="key">
+    Create new note
+  </ParamField>
+  
+  <ParamField path="e" type="key">
+    Edit selected note
+  </ParamField>
+  
+  <ParamField path="p" type="key">
+    Preview note (read-only markdown view)
+  </ParamField>
+  
+  <ParamField path="d" type="key">
+    Delete selected note (with confirmation)
+  </ParamField>
+  
+  <ParamField path="/" type="key">
+    Open search filter
+  </ParamField>
+  
+  <ParamField path="s" type="key">
+    Cycle sort mode (Date↓ → Title → Date↑)
+  </ParamField>
+  
+  <ParamField path="t" type="key">
+    Filter by tag (multi-select picker)
+  </ParamField>
+  
+  <ParamField path="Ctrl+G" type="key">
+    Quick-Tag picker (add existing tags to note body when editing)
+  </ParamField>
+  
+  <ParamField path="Ctrl+R" type="key">
+    Reset all filters
+  </ParamField>
+  
+  <ParamField path="j / ↓" type="key">
+    Move selection down
+  </ParamField>
+  
+  <ParamField path="k / ↑" type="key">
+    Move selection up
+  </ParamField>
+</Expandable>
+
+<Expandable title="Notes Edit Mode Shortcuts">
+  <ParamField path="Tab" type="key">
+    Switch between title and body fields
+  </ParamField>
+  
+  <ParamField path="Enter" type="key">
+    Save (when in title) / New line (when in body)
+  </ParamField>
+  
+  <ParamField path="Ctrl+S" type="key">
+    Save note from any field
+  </ParamField>
+  
+  <ParamField path="Ctrl+E" type="key">
+    Toggle markdown preview
+  </ParamField>
+  
+  <ParamField path="Ctrl+B" type="key">
+    Bold text
+  </ParamField>
+  
+  <ParamField path="Ctrl+I" type="key">
+    Italic text
+  </ParamField>
+  
+  <ParamField path="Esc" type="key">
+    Cancel and return to list
+  </ParamField>
+</Expandable>
+
+<Expandable title="Todos Screen Shortcuts">
+  <ParamField path="c" type="key">
+    Create new todo
+  </ParamField>
+  
+  <ParamField path="e" type="key">
+    Edit selected todo
+  </ParamField>
+  
+  <ParamField path="v" type="key">
+    Preview todo details
+  </ParamField>
+  
+  <ParamField path="d" type="key">
+    Delete selected todo (with confirmation)
+  </ParamField>
+  
+  <ParamField path="Space" type="key">
+    Toggle todo completion
+  </ParamField>
+  
+  <ParamField path="/" type="key">
+    Open search filter
+  </ParamField>
+  
+  <ParamField path="s" type="key">
+    Cycle sort mode (Date↓ → Priority → Date↑ → A-Z → Due Date)
+  </ParamField>
+  
+  <ParamField path="p" type="key">
+    Cycle priority filter (All → High → Medium → Low)
+  </ParamField>
+  
+  <ParamField path="t" type="key">
+    Filter by tag
+  </ParamField>
+  
+  <ParamField path="Ctrl+R" type="key">
+    Reset all filters
+  </ParamField>
+  
+  <ParamField path="j / ↓" type="key">
+    Move selection down
+  </ParamField>
+  
+  <ParamField path="k / ↑" type="key">
+    Move selection up
+  </ParamField>
+</Expandable>
+
+<Expandable title="Focus Session Shortcuts">
+  <ParamField path="s" type="key">
+    Start timer (or resume if paused)
+  </ParamField>
+  
+  <ParamField path="p" type="key">
+    Pause timer
+  </ParamField>
+  
+  <ParamField path="c" type="key">
+    Cancel current session
+  </ParamField>
+  
+  <ParamField path="b" type="key">
+    Skip to break / Skip break
+  </ParamField>
+  
+  <ParamField path="d" type="key">
+    Change work/break duration (opens picker)
+  </ParamField>
+  
+  <ParamField path="h" type="key">
+    Toggle history view
+  </ParamField>
+  
+  <ParamField path="Esc" type="key">
+    Return to idle / Cancel action
+  </ParamField>
+</Expandable>
+
+<Expandable title="Duration Picker (Focus)">
+  <ParamField path="← / →" type="key">
+    Adjust duration (auto-saves and auto-exits after 500ms)
+  </ParamField>
+  
+  <ParamField path="Tab" type="key">
+    Switch between work/break duration
+  </ParamField>
+  
+  <ParamField path="Enter" type="key">
+    Done - exit immediately
+  </ParamField>
+  
+  <ParamField path="Esc" type="key">
+    Cancel and exit
+  </ParamField>
+</Expandable>
+
+<Expandable title="Link Modal Shortcuts">
+  <ParamField path="c" type="key">
+    Create new link
+  </ParamField>
+  
+  <ParamField path="d" type="key">
+    Delete selected link
+  </ParamField>
+  
+  <ParamField path="?" type="key">
+    Show help
+  </ParamField>
+  
+  <ParamField path="↑ / ↓" type="key">
+    Navigate link types or targets
+  </ParamField>
+  
+  <ParamField path="Enter" type="key">
+    Select / Confirm
+  </ParamField>
+  
+  <ParamField path="Esc" type="key">
+    Close modal / Go back
+  </ParamField>
+</Expandable>
+
+<Expandable title="Mind Map Shortcuts">
+  <ParamField path="h / j / k / l" type="key">
+    Navigate nodes (vim-style)
+  </ParamField>
+  
+  <ParamField path="+ / -" type="key">
+    Zoom in / Zoom out
+  </ParamField>
+  
+  <ParamField path="Enter" type="key">
+    Open selected note
+  </ParamField>
+  
+  <ParamField path="?" type="key">
+    Show help
+  </ParamField>
+  
+  <ParamField path="Esc" type="key">
+    Return to notes
+  </ParamField>
+</Expandable>
+
+## Configuration
+
+flowState stores its configuration and data in `~/.config/flowState/`:
+
+<ResponseField name="config.json" type="file">
+  Configuration file with database path, model path, and settings
+</ResponseField>
+
+<ResponseField name="flowState.db" type="file">
+  SQLite database containing all notes, todos, sessions, and links
+</ResponseField>
+
+<ResponseField name="models/" type="directory">
+  Directory containing the embedding model (all-MiniLM-L6-v2, ~90MB)
+</ResponseField>
+
+<ResponseField name="debug.log" type="file">
+  Debug log file created in working directory (not config directory)
+</ResponseField>
+
+<Tip>
+The database uses SQLite's `PRAGMA foreign_keys = ON` for referential integrity. All data is stored locally with no cloud dependencies.
+</Tip>

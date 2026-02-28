@@ -1,0 +1,260 @@
+---
+title: Bidirectional Linking
+description: Connect your notes and todos with powerful bidirectional links
+icon: "link"
+---
+
+## Overview
+
+flowState CLI's linking system allows you to create meaningful connections between your notes and todos, building a knowledge graph that helps you see relationships and context across your work.
+
+<Info>
+Links are **bidirectional** - if Note A links to Note B, Note B automatically shows a backlink to Note A.
+</Info>
+
+## Link Types
+
+flowState supports three types of relationships to organize your connections:
+
+<CardGroup cols={3}>
+  <Card title="Related" icon="link">
+    General connection between items that share context or topic
+  </Card>
+  <Card title="Contains" icon="folder-tree">
+    Parent/child relationship - useful for projects containing tasks
+  </Card>
+  <Card title="References" icon="quote-left">
+    One-way citation - when one item references another as a source
+  </Card>
+</CardGroup>
+
+### When to Use Each Type
+
+- **Related**: Use for notes on similar topics, related project notes, or connected ideas
+- **Contains**: Use when linking a project note to its sub-tasks, or a parent todo to child todos
+- **References**: Use when citing sources, referencing meeting notes, or linking to documentation
+
+## Creating Links
+
+### Method 1: Manual Links (Ctrl+L)
+
+Create explicit links between notes and todos using the link modal:
+
+<Steps>
+  <Step title="Open the Link Modal">
+    Select a note or todo and press `Ctrl+L` to open the linking interface
+  </Step>
+  <Step title="Choose Link Type">
+    Use `↑`/`↓` arrow keys or `j`/`k` to select:
+    - **Related**: General connection
+    - **Contains**: Parent/child relationship  
+    - **References**: One-way citation
+    
+    Press `Enter` to confirm
+  </Step>
+  <Step title="Select Target Item">
+    Navigate through available notes and todos with arrow keys
+    
+    <Note>
+    The current item is automatically excluded - you can't link an item to itself
+    </Note>
+    
+    Press `Enter` to create the link
+  </Step>
+  <Step title="View Your Links">
+    The link modal shows all connections for the selected item, including backlinks from other items
+  </Step>
+</Steps>
+
+### Method 2: Wikilinks (In Note Body)
+
+Create links while writing by using wikilink syntax:
+
+```markdown
+See [[Project Planning]] for more details.
+This relates to [[Meeting Notes - 2026-02-15]].
+```
+
+<Tip>
+Wikilinks automatically create bidirectional connections. The linked note will show a backlink to the current note.
+</Tip>
+
+## Viewing Links
+
+### Link Modal Interface
+
+Press `Ctrl+L` on any note or todo to see:
+
+- **All linked items** - notes and todos connected to the current item
+- **Link types** - displayed as badges `[Related]`, `[Contains]`, `[References]`
+- **Item types** - icons distinguish notes 📝 from todos ✅
+- **Bidirectional display** - automatically shows both outgoing links and backlinks
+
+### Link Indicators
+
+Linked items display with:
+- 📝 **Note icon** for note links
+- ✅ **Todo icon** for todo links
+- **[Link Type]** badge showing the relationship type
+
+## Managing Links
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+L` | Open link modal for selected item |
+| `c` or `n` | Create new link |
+| `d` | Delete selected link |
+| `↑`/`↓` | Navigate links or options |
+| `Enter` | Select/confirm |
+| `Esc` | Close modal or go back |
+| `?` | Show help |
+
+### Deleting Links
+
+<Warning>
+Deleting a link removes it from both sides of the connection. If you delete a link from Note A to Note B, the backlink from B to A is also removed.
+</Warning>
+
+<Steps>
+  <Step title="Open Link Modal">
+    Press `Ctrl+L` on the item with the link you want to remove
+  </Step>
+  <Step title="Select the Link">
+    Use arrow keys to highlight the link to delete
+  </Step>
+  <Step title="Delete">
+    Press `d` to remove the link
+  </Step>
+</Steps>
+
+## Use Cases
+
+### Project Management
+
+```
+Project Note: "Website Redesign"
+├── Contains → Todo: "Design mockups"
+├── Contains → Todo: "Implement frontend"
+└── Related → Note: "Brand Guidelines"
+```
+
+### Knowledge Base
+
+```
+Note: "React Hooks"
+├── References → Note: "Official React Docs"
+├── Related → Note: "State Management Patterns"
+└── Related → Note: "TypeScript with React"
+```
+
+### Meeting Notes
+
+```
+Note: "Team Standup - Feb 28"
+├── Contains → Todo: "Review PR #123"
+├── Contains → Todo: "Update documentation"
+└── Related → Note: "Sprint Planning"
+```
+
+## How Links Work
+
+<Info>
+**Bidirectional by Design**: Links in flowState are always two-way. When you create a link from A to B, both items show the connection - A shows the link, B shows the backlink.
+</Info>
+
+### Automatic Updates
+
+- **Rename items**: Links update automatically when you rename notes or todos
+- **Delete items**: Links are cleaned up when items are deleted
+- **Wikilinks**: Parsed and indexed automatically when you save notes
+
+### Link Storage
+
+Links are stored in the SQLite database with:
+- Source item (type + ID)
+- Target item (type + ID)  
+- Link type (Related/Contains/References)
+- Creation timestamp
+- Unique constraint preventing duplicate links
+
+## Best Practices
+
+<Tip>
+**Start simple**: Begin with just "Related" links to connect similar topics. Add "Contains" and "References" as your needs grow.
+</Tip>
+
+### Effective Linking Strategies
+
+1. **Use Contains for hierarchies**: Link project notes to their tasks with "Contains" type
+2. **Use Related for context**: Connect notes on similar topics to discover patterns
+3. **Use References for sources**: Cite meeting notes, documentation, or research
+4. **Combine with tags**: Use tags for categories, links for specific relationships
+5. **Check the Mind Map**: Visualize your link structure to find gaps or over-connections
+
+### Avoid Over-Linking
+
+- Don't link everything - be intentional about connections
+- Use tags for broad categorization, links for specific relationships
+- If two items are only loosely related, tags might be better than links
+
+## Troubleshooting
+
+### Links Not Showing
+
+<AccordionGroup>
+  <Accordion title="Wikilinks not creating connections">
+    - Ensure you're using double brackets: `[[Note Title]]`
+    - The note title must match exactly (case-sensitive)
+    - Links are created when you save the note with `Ctrl+S`
+    - Check the link modal with `Ctrl+L` to verify
+  </Accordion>
+  
+  <Accordion title="Can't find item to link to">
+    - The current item is excluded from the target list
+    - Archived or deleted items won't appear
+    - Try searching by typing in the link modal (if search is enabled)
+  </Accordion>
+  
+  <Accordion title="Backlinks not appearing">
+    - Backlinks are automatic - no action needed
+    - Refresh by closing and reopening the link modal
+    - Verify the link was created successfully
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Features
+
+### Integration with Mind Map
+
+Your links create the structure for the Mind Map visualization:
+
+- Press `Ctrl+G` to see your knowledge graph
+- Nodes represent notes, edges represent links
+- Navigate your links visually with `h`/`j`/`k`/`l`
+- Press `Enter` on a node to open that note
+
+<Tip>
+See the [Mind Map documentation](/features/mind-map) for more on visual navigation.
+</Tip>
+
+### Link-Based Navigation
+
+Use links to navigate your knowledge base:
+
+1. Open a note with `e` or `p`
+2. Press `Ctrl+L` to see connections
+3. Navigate to linked items
+4. Build context by following the thread of links
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Mind Map" icon="diagram-project" href="/features/mind-map">
+    Visualize your note connections as an interactive graph
+  </Card>
+  <Card title="Semantic Search" icon="magnifying-glass" href="/features/semantic-search">
+    Find related notes by meaning, not just links
+  </Card>
+</CardGroup>

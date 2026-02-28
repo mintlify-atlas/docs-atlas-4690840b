@@ -1,0 +1,314 @@
+---
+title: Customization
+description: Configuration options, theme settings, and customization for flowState CLI
+---
+
+flowState CLI provides configuration options for data paths, semantic search, and visual theming. All settings are managed through the `Config` struct in `internal/config/config.go`.
+
+## Configuration Fields
+
+The `Config` struct defines the following customizable fields:
+
+```go
+type Config struct {
+    DataDir           string `mapstructure:"data_dir"`
+    DbPath            string `mapstructure:"db_path"`
+    QdrantUrl         string `mapstructure:"qdrant_url"`
+    ModelPath         string `mapstructure:"model_path"`
+    EmbeddingsEnabled bool   `mapstructure:"embeddings_enabled"`
+}
+```
+
+### Field Reference
+
+<AccordionGroup>
+  <Accordion title="DataDir - Base data directory">
+    **Type:** `string`  
+    **Default:** `~/.config/flowState`  
+    **Description:** Base directory for all application data including database and models.
+
+    ```go
+    DataDir: filepath.Join(homeDir, ".config", "flowState")
+    ```
+
+    <Warning>
+      Changing `DataDir` after first run will create a new database. To migrate data, manually copy `flowState.db` and the `models/` directory to the new location.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="DbPath - SQLite database location">
+    **Type:** `string`  
+    **Default:** `~/.config/flowState/flowState.db`  
+    **Description:** Path to the SQLite database file storing notes, todos, sessions, and links.
+
+    ```go
+    DbPath: filepath.Join(dataDir, "flowState.db")
+    ```
+
+    **Schema Tables:**
+    - `notes` - Note storage with tags and wikilinks
+    - `todos` - Task management with priorities
+    - `sessions` - Focus timer history
+    - `links` - Bidirectional relationships
+    - `note_vectors` - Embedding vectors (384-dim BLOB)
+
+    <Note>
+      The database is created automatically on first run. No manual setup required.
+    </Note>
+  </Accordion>
+
+  <Accordion title="ModelPath - ONNX model directory">
+    **Type:** `string`  
+    **Default:** `~/.config/flowState/models`  
+    **Description:** Directory for storing ONNX embedding models used for semantic search.
+
+    ```go
+    ModelPath: filepath.Join(dataDir, "models")
+    ```
+
+    **Model Storage:**
+    - `model.onnx` - all-MiniLM-L6-v2 embedding model (~90MB)
+    - Downloaded automatically on first semantic search
+    - Generates 384-dimensional embeddings
+
+    <Note>
+      Models are downloaded once and cached locally. Subsequent runs use the cached model.
+    </Note>
+  </Accordion>
+
+  <Accordion title="QdrantUrl - Vector database URL">
+    **Type:** `string`  
+    **Default:** `localhost:6333`  
+    **Description:** URL for Qdrant vector database connection (currently unused - embeddings stored in SQLite).
+
+    ```go
+    QdrantUrl: "localhost:6333"
+    ```
+
+    <Warning>
+      This field is reserved for future use. Currently, vectors are stored in the `note_vectors` table in SQLite, not in Qdrant.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="EmbeddingsEnabled - Toggle semantic search">
+    **Type:** `bool`  
+    **Default:** `true`  
+    **Description:** Enable or disable semantic search and embedding generation.
+
+    ```go
+    EmbeddingsEnabled: true
+    ```
+
+    **When Enabled (`true`):**
+    - Notes are automatically embedded on create/update
+    - Semantic search available via `Ctrl+/`
+    - Natural language queries supported
+    - Requires ~100MB RAM for model
+
+    **When Disabled (`false`):**
+    - No embeddings generated
+    - Semantic search unavailable
+    - Reduces memory footprint
+    - Keyword search still works
+
+    <Note>
+      Disabling embeddings does not delete existing vectors in `note_vectors` table. Re-enabling will resume embedding new/updated notes.
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+## Configuration File (Future)
+
+<Warning>
+  **Config File Not Yet Implemented** - Currently, all configuration uses hardcoded defaults from `config.go`. A `config.yaml` file at `~/.config/flowState/config.yaml` is planned for future releases.
+</Warning>
+
+### Planned Config File Format
+
+```yaml ~/.config/flowState/config.yaml
+# flowState CLI Configuration
+data_dir: ~/.config/flowState
+db_path: ~/.config/flowState/flowState.db
+qdrant_url: localhost:6333
+model_path: ~/.config/flowState/models
+embeddings_enabled: true
+```
+
+<Note>
+  Follow [GitHub Issues](https://github.com/Jericoz-JC/flowState-CLI/issues) for updates on config file support.
+</Note>
+
+## Theme Customization
+
+flowState uses the **ARCHWAVE** vaporwave aesthetic with cyan, pink, and lavender accents. Theme styles are defined in `internal/tui/styles/theme.go`.
+
+### Color Palette
+
+| Color Name | Hex Code | Usage |
+|------------|----------|-------|
+| **PrimaryColor** | `#E0BBE4` (Lavender) | Headers, accents |
+| **SecondaryColor** | `#00D9FF` (Cyan) | Work sessions, active states |
+| **AccentColor** | `#FF6EC7` (Pink) | Highlights, selections |
+| **SuccessColor** | `#00D9FF` (Cyan) | Running timers, success states |
+| **WarningColor** | `#FFD700` (Yellow) | Paused states, warnings |
+| **MutedColor** | `#555555` (Gray) | Inactive elements |
+
+### Theme Functions
+
+The theme provides reusable styling functions:
+
+```go
+// Neon glow border effect
+GlowBorder(content, color string) string
+GlowBox(content string) string  // Uses AccentColor
+
+// Gradient text effects
+GradientTitle(text string) string
+NeonText(text string) string
+
+// ASCII time display (5-line tall digits)
+RenderASCIITime(minutes, seconds int, color lipgloss.Color) string
+
+// Progress indicators
+RenderProgressRing(percent float64, current, total int) string
+RenderMiniBarChart(data []int, maxHeight int) string
+
+// Session tracking
+SessionCountIndicator(completed, target int) string
+```
+
+<Note>
+  Theme colors are currently hardcoded. Custom theme support is planned for a future release.
+</Note>
+
+## Component Customization
+
+flowState includes reusable TUI components in `internal/tui/components/`:
+
+### AnimatedSpinner
+
+Loading indicator with vaporwave styling:
+
+```go
+spinner := components.NewAnimatedSpinner(
+    components.VaporwaveSpinnerFrames,
+    150 * time.Millisecond,
+    "Loading...",
+)
+spinner.Start()
+```
+
+**Frame Sets:**
+- `VaporwaveSpinnerFrames` - ◢ ◣ ◤ ◥ rotation
+- `NeonSpinnerFrames` - ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ dots
+- `DotsSpinnerFrames` - ⣾ ⣽ ⣻ ⢿ ⡿ ⣟ ⣯ ⣷ braille
+
+### ASCIIHeader
+
+Screen headers with ASCII art decoration:
+
+```go
+header := components.NewASCIIHeader(
+    "N O T E S",
+    components.ASCIIStyleBanner,
+)
+header.SetSubtitle("Quick capture mode")
+header.SetItemCount(42)
+```
+
+**Styles:**
+- `ASCIIStyleMinimal` - Simple text with dots
+- `ASCIIStyleBoxed` - Bordered header
+- `ASCIIStyleBanner` - Full-width banner with decorations
+
+### GlowBorder
+
+Neon glow effect wrapper:
+
+```go
+// Custom color
+content := theme.GlowBorder("Hello World", "#FF6EC7")
+
+// Using accent color (pink)
+content := theme.GlowBox("Hello World")
+```
+
+## Keyboard Shortcuts (Non-Configurable)
+
+Global keyboard shortcuts are currently hardcoded in `internal/tui/keymap/`:
+
+| Key | Action | Configurable |
+|-----|--------|-------------|
+| `Ctrl+X` | Quick capture | No |
+| `Ctrl+N` | Notes screen | No |
+| `Ctrl+T` | Todos screen | No |
+| `Ctrl+F` | Focus screen | No |
+| `Ctrl+/` | Search | No |
+| `Ctrl+G` | Mind map | No |
+| `?` | Help modal | No |
+| `q` | Quit | No |
+
+<Warning>
+  Custom keybindings are not currently supported. All shortcuts use Bubble Tea defaults.
+</Warning>
+
+## Performance Tuning
+
+### Disable Embeddings for Low-Memory Systems
+
+If you have limited RAM (less than 512MB available), consider disabling embeddings:
+
+```go
+// In internal/config/config.go
+cfg = &Config{
+    // ... other fields
+    EmbeddingsEnabled: false,  // Set to false
+}
+```
+
+**Trade-offs:**
+- ✅ Reduces memory usage by ~100MB
+- ✅ Faster startup (no model loading)
+- ❌ No semantic search (keyword search still works)
+- ❌ No natural language queries
+
+### Database Optimization
+
+The SQLite database is configured for optimal performance:
+
+```sql
+-- Indexes for fast lookups
+CREATE INDEX idx_notes_tags ON notes(tags);
+CREATE INDEX idx_todos_status ON todos(status);
+CREATE INDEX idx_links_source ON links(source_type, source_id);
+```
+
+<Note>
+  Database indexes are created automatically during migration. No manual optimization required.
+</Note>
+
+## Environment Variables (Future)
+
+<Warning>
+  Environment variable overrides are not currently implemented. All configuration uses defaults from `config.go`.
+</Warning>
+
+### Planned Environment Variables
+
+| Variable | Purpose | Example |
+|----------|---------|----------|
+| `FLOWSTATE_DATA_DIR` | Override data directory | `/custom/path/flowState` |
+| `FLOWSTATE_DB_PATH` | Override database path | `/custom/db.sqlite` |
+| `FLOWSTATE_EMBEDDINGS` | Enable/disable embeddings | `true` or `false` |
+| `FLOWSTATE_MODEL_PATH` | Override model directory | `/custom/models` |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Setup Guide" icon="gear" href="/configuration/setup">
+    Learn about data directory structure and first-run setup
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/configuration/troubleshooting">
+    Fix common configuration and runtime issues
+  </Card>
+</CardGroup>

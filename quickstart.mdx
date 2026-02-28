@@ -1,80 +1,366 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get from install to creating your first note, todo, and focus session in minutes
 ---
 
-## Get started in three steps
+## Welcome to flowState CLI!
 
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+This guide will walk you through creating your first note, managing todos, and starting a focus session. By the end, you'll understand the core workflows that make flowState CLI a powerful productivity tool.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **First launch**: On first run, flowState will initialize the database and download the embedding model (~90MB). This happens only once.
 </Note>
+
+## Launch flowState
+
+After [installation](/installation), launch flowState CLI:
+
+```bash
+flowstate
+```
+
+You'll see the home screen with navigation options:
+
+- `Ctrl+N` - Notes
+- `Ctrl+T` - Todos
+- `Ctrl+F` - Focus Sessions
+- `Ctrl+/` - Semantic Search
+- `Ctrl+G` - Mind Map
+- `Ctrl+X` - Quick Capture (works from anywhere!)
+
+<Tip>
+  Press `?` on any screen to see context-sensitive help with all available keyboard shortcuts.
+</Tip>
+
+## Creating Notes
+
+<Steps>
+  <Step title="Navigate to Notes">
+    Press `Ctrl+N` to open the Notes screen.
+  </Step>
+  
+  <Step title="Create a new note">
+    Press `c` to create a new note. You'll see:
+    - **Title field** (focused by default)
+    - **Body field** (press Tab to switch)
+  </Step>
+  
+  <Step title="Write your note">
+    ```markdown
+    Title: Project Ideas
+    Body: 
+    Need to research #ai tools for productivity
+    See also [[Focus Techniques]] for time management
+    ```
+    
+    <Note>
+      - `#hashtag` - Auto-extracted as tags
+      - `@mention` - Also works as tags
+      - `[[Wikilink]]` - Creates relationships between notes
+      - Press `Enter` in body to create new lines
+    </Note>
+  </Step>
+  
+  <Step title="Save the note">
+    Press `Ctrl+S` to save, or `Esc` to cancel.
+    
+    Your note appears in the list with:
+    - Creation date
+    - Title
+    - Tags as colored badges
+  </Step>
+  
+  <Step title="Preview your note">
+    Select a note and press `p` to preview it in read-only mode.
+    
+    Press `e` from preview to edit, or `Esc` to close.
+  </Step>
+</Steps>
+
+### Quick Note Tips
+
+<CardGroup cols={2}>
+  <Card title="Quick Capture" icon="bolt">
+    Press `Ctrl+X` from **anywhere** to instantly capture a thought without leaving your current screen.
+  </Card>
+  
+  <Card title="Markdown Formatting" icon="markdown">
+    While editing, use:
+    - `Ctrl+B` - Bold text
+    - `Ctrl+I` - Italic text
+    - `Ctrl+E` - Toggle preview
+  </Card>
+  
+  <Card title="Tag Management" icon="tag">
+    Press `Ctrl+G` while editing to open the Quick-Tag picker - select from existing tags to add to your note.
+  </Card>
+  
+  <Card title="Filtering" icon="filter">
+    - `/` - Search by text
+    - `t` - Filter by tags
+    - `s` - Cycle sort modes (Date↓, Title, Date↑)
+    - `Ctrl+R` - Reset all filters
+  </Card>
+</CardGroup>
+
+## Managing Todos
+
+<Steps>
+  <Step title="Navigate to Todos">
+    Press `Ctrl+T` to open the Todos screen.
+  </Step>
+  
+  <Step title="Create a todo">
+    Press `c` to create a new todo. You'll see:
+    - **Title field** (required)
+    - **Description field** (optional)
+    - **Priority dropdown** (Low, Medium, High)
+    - **Due date field** (optional)
+  </Step>
+  
+  <Step title="Fill in todo details">
+    ```
+    Title: Review documentation #urgent
+    Description: Check all code examples and API references
+    Priority: High
+    Due Date: 2026-03-15
+    ```
+    
+    <Tip>
+      Use `Tab` to move between fields. Tags (`#hashtag`) work in both title and description.
+    </Tip>
+  </Step>
+  
+  <Step title="Save and manage">
+    - Press `Ctrl+S` to save
+    - Press `Space` on a todo to toggle completion
+    - Press `e` to edit an existing todo
+    - Press `v` to preview full todo details
+  </Step>
+</Steps>
+
+### Todo Features
+
+<CardGroup cols={2}>
+  <Card title="Status Indicators" icon="circle-check">
+    - **[ ]** Pending (yellow)
+    - **[~]** In Progress (cyan)
+    - **[x]** Completed (green)
+    
+    Toggle with `Space` key
+  </Card>
+  
+  <Card title="Priority Levels" icon="flag">
+    - 🔴 **High** - Urgent tasks
+    - 🟡 **Medium** - Normal priority
+    - 🟢 **Low** - When you have time
+    
+    Filter by pressing `p`
+  </Card>
+  
+  <Card title="Due Dates" icon="calendar">
+    Todos show relative dates:
+    - ⚠️ "Overdue" (red)
+    - 📅 "Due today" (yellow)
+    - ⏰ "Due in 2 days" (cyan)
+  </Card>
+  
+  <Card title="Sorting & Filtering" icon="sort">
+    - `s` - Cycle sort (Date↓, Priority, Date↑, A-Z, Due Date)
+    - `t` - Filter by tags
+    - `p` - Filter by priority
+    - `/` - Search by text
+    - `Ctrl+R` - Reset all filters
+  </Card>
+</CardGroup>
+
+## Focus Sessions
+
+Use the Pomodoro-style timer to stay focused.
+
+<Steps>
+  <Step title="Navigate to Focus">
+    Press `Ctrl+F` to open the Focus Sessions screen.
+  </Step>
+  
+  <Step title="(Optional) Set duration">
+    Press `d` to open the duration picker:
+    - Use `←/→` arrows to select duration (auto-saves)
+    - Press `Tab` to switch between work/break duration
+    - Press `Enter` or wait 500ms to auto-exit
+    
+    **Default**: 25 min work / 5 min break
+  </Step>
+  
+  <Step title="Start the timer">
+    Press `s` to start the focus session.
+    
+    You'll see:
+    - Large ASCII timer countdown
+    - Progress ring with gradient fill
+    - Current session count (● completed, ○ remaining)
+    - Mode indicator (🍅 Work Session)
+  </Step>
+  
+  <Step title="Manage the session">
+    - `p` - Pause the timer
+    - `s` - Resume (when paused)
+    - `b` - Skip to break / Skip break
+    - `c` - Cancel session
+  </Step>
+  
+  <Step title="View history and stats">
+    Press `h` to view:
+    - Session history (all completed sessions)
+    - Total focus time
+    - Current streak (consecutive focus days)
+    - 7-day activity chart
+  </Step>
+</Steps>
+
+### Focus Timer Features
+
+<CardGroup cols={2}>
+  <Card title="Visual Timer" icon="clock">
+    - Large ASCII art digits (5 lines tall)
+    - Color-coded by mode (cyan work, teal break, yellow paused)
+    - Progress ring with gradient effect
+  </Card>
+  
+  <Card title="Session Tracking" icon="chart-line">
+    - Today's completed sessions indicator
+    - 7-day activity bar chart (M-S)
+    - Current streak with 🔥 emoji
+    - Total focus time statistics
+  </Card>
+  
+  <Card title="Smart Duration Picker" icon="sliders">
+    - Presets: 15, 25, 45, 60 min (work)
+    - Presets: 5, 10, 15 min (break)
+    - Auto-saves on selection
+    - Auto-exits after 500ms
+  </Card>
+  
+  <Card title="Work/Break Cycle" icon="rotate">
+    - Automatic break after work session
+    - Skip break to continue working
+    - Pause/resume anytime
+    - Cancel without saving
+  </Card>
+</CardGroup>
+
+## Semantic Search
+
+Find notes by meaning, not just keywords.
+
+<Steps>
+  <Step title="Navigate to Search">
+    Press `Ctrl+/` to open Semantic Search.
+  </Step>
+  
+  <Step title="Enter a query">
+    Type a natural language query:
+    ```
+    productivity techniques
+    ```
+    
+    Press `Enter` to search.
+  </Step>
+  
+  <Step title="Browse results">
+    Results are ranked by semantic similarity:
+    - Use `j/k` or arrow keys to navigate
+    - Press `Enter` to open a note
+    - Press `Esc` to edit query
+  </Step>
+</Steps>
+
+<Note>
+  **How it works**: flowState uses local ONNX embeddings to find notes with similar meaning. The model (~90MB) is downloaded on first run and stored locally - no cloud dependencies.
+</Note>
+
+## Linking Notes & Todos
+
+Create relationships between items.
+
+<Steps>
+  <Step title="Select an item">
+    Select a note or todo in the list view.
+  </Step>
+  
+  <Step title="Open linking modal">
+    Press `Ctrl+L` to open the Links modal.
+  </Step>
+  
+  <Step title="Create a link">
+    Press `c` to create a new link:
+    1. Select link type (related, contains, references)
+    2. Select target item (note or todo)
+    3. Press `Enter` to confirm
+  </Step>
+  
+  <Step title="View linked items">
+    All linked items appear in the Links modal. Press `Enter` to navigate to a linked item.
+  </Step>
+</Steps>
+
+## Mind Map
+
+Visualize your note connections.
+
+<Steps>
+  <Step title="Navigate to Mind Map">
+    Press `Ctrl+G` to open the Mind Map screen.
+  </Step>
+  
+  <Step title="Navigate the graph">
+    - `h/j/k/l` - Move between nodes (vim-style)
+    - `+/-` - Zoom in/out
+    - `Enter` - Open selected note
+  </Step>
+  
+  <Step title="View help">
+    Press `?` to see all available keyboard shortcuts.
+  </Step>
+</Steps>
+
+## Global Shortcuts
+
+These work from **any screen**:
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+X` | Quick Capture (instant note) |
+| `Ctrl+N` | Navigate to Notes |
+| `Ctrl+T` | Navigate to Todos |
+| `Ctrl+F` | Navigate to Focus Sessions |
+| `Ctrl+/` | Navigate to Semantic Search |
+| `Ctrl+G` | Navigate to Mind Map |
+| `Ctrl+L` | Open Links modal |
+| `Ctrl+H` | Return to Home |
+| `?` | Show help for current screen |
+| `q` | Quit application |
+
+<Tip>
+  On macOS, you can use `Cmd` instead of `Ctrl` for all shortcuts.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Keyboard Shortcuts" icon="keyboard" href="/keyboard-shortcuts">
+    Master all keyboard shortcuts organized by screen
+  </Card>
+  
+  <Card title="Features" icon="sparkles" href="/features/notes">
+    Deep dive into advanced features
+  </Card>
+  
+  <Card title="Configuration" icon="gear" href="/configuration/customization">
+    Customize flowState to your workflow
+  </Card>
+  
+  <Card title="Troubleshooting" icon="wrench" href="/configuration/troubleshooting">
+    Common issues and solutions
+  </Card>
+</CardGroup>

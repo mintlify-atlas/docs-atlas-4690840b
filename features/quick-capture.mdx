@@ -1,0 +1,421 @@
+---
+title: Quick Capture
+description: Instant note capture from anywhere with Ctrl+X
+icon: "bolt"
+---
+
+## Overview
+
+Quick Capture is flowState's instant note-taking modal that lets you capture fleeting thoughts without leaving your current context. Press `Ctrl+X` from any screen, type your thought, and save - all in seconds.
+
+<Info>
+**Always Accessible**: Quick Capture works from every screen in flowState. No need to navigate to the Notes screen first.
+</Info>
+
+## How It Works
+
+<Steps>
+  <Step title="Trigger Quick Capture">
+    Press `Ctrl+X` from **any screen** in flowState
+    
+    <Tip>
+    Works from Notes, Todos, Focus, Search, Mind Map, or even the Home screen.
+    </Tip>
+  </Step>
+  <Step title="Type Your Thought">
+    The Quick Capture modal opens with a text area ready for input:
+    - First line becomes the note **title**
+    - Everything after becomes the note **body**
+    - Use `#hashtags` anywhere to add tags
+  </Step>
+  <Step title="Save">
+    Press `Ctrl+S` or `Ctrl+Enter` to save the note instantly
+    
+    <Note>
+    The note is automatically tagged with `#quick` for easy filtering later.
+    </Note>
+  </Step>
+  <Step title="Return to Context">
+    The modal closes and you're back where you started - no navigation required
+  </Step>
+</Steps>
+
+## When to Use Quick Capture
+
+### Perfect For:
+
+<CardGroup cols={2}>
+  <Card title="Fleeting Thoughts" icon="lightbulb">
+    Capture ideas before they slip away during focused work
+  </Card>
+  <Card title="Meeting Notes" icon="users">
+    Jot down action items or key points without opening full editor
+  </Card>
+  <Card title="Interruptions" icon="bell">
+    Note something quickly when interrupted, then return to your task
+  </Card>
+  <Card title="Quick Reminders" icon="clock">
+    Save a reminder or todo without switching to the Todos screen
+  </Card>
+</CardGroup>
+
+### Use Cases
+
+```
+Scenario 1: During a Focus Session
+  → Press Ctrl+X
+  → "Follow up with client about API requirements #work #urgent"
+  → Ctrl+S
+  → Back to focus timer (uninterrupted)
+
+Scenario 2: Browsing Mind Map
+  → Notice a gap in your knowledge graph
+  → Press Ctrl+X
+  → "Research topic: distributed tracing #research #backend"
+  → Ctrl+S
+  → Continue exploring Mind Map
+
+Scenario 3: Reading Through Notes
+  → Have a related idea while reading
+  → Press Ctrl+X
+  → "Extension of authentication approach\nCould use OAuth2 with PKCE flow"
+  → Ctrl+S
+  → Back to reading
+```
+
+## Title & Body Auto-Split
+
+### How It Works
+
+Quick Capture intelligently splits your input:
+
+1. **First line** → Note title (max 50 characters)
+2. **Remaining lines** → Note body
+3. **Long titles** → Truncated at 50 chars, overflow goes to body
+
+<Tip>
+Make your first line a concise summary. Add details on subsequent lines.
+</Tip>
+
+### Examples
+
+**Single-line capture:**
+```
+Input:
+  "Client meeting notes from Feb 28 #meeting"
+
+Result:
+  Title: "Client meeting notes from Feb 28 #meeting"
+  Body: (empty)
+  Tags: ["meeting", "quick"]
+```
+
+**Multi-line capture:**
+```
+Input:
+  "API design decisions
+   Use REST for public API
+   GraphQL for internal tools
+   #architecture #backend"
+
+Result:
+  Title: "API design decisions"
+  Body: "Use REST for public API\nGraphQL for internal tools\n#architecture #backend"
+  Tags: ["architecture", "backend", "quick"]
+```
+
+**Long title:**
+```
+Input:
+  "This is a very long title that exceeds fifty characters and will be truncated"
+
+Result:
+  Title: "This is a very long title that exceeds fifty ch"
+  Body: "aracters and will be truncated"
+  Tags: ["quick"]
+```
+
+## Automatic Tagging
+
+### #quick Tag
+
+All Quick Capture notes are automatically tagged with `#quick`:
+
+- **Filter later**: Find all quick captures with tag filter
+- **Review regularly**: Process quick thoughts into full notes
+- **Temporary marker**: Remove `#quick` tag when you flesh out the note
+
+<Info>
+The `#quick` tag is added even if you don't include it in your text. It's automatic!
+</Info>
+
+### Inline Tags
+
+Use hashtags anywhere in your capture:
+
+```
+"Meeting with Sarah about Q2 roadmap #work #urgent #Q2"
+  → Tags: ["work", "urgent", "q2", "quick"]
+
+"Research ONNX runtime for #embeddings #ml"
+  → Tags: ["embeddings", "ml", "quick"]
+```
+
+<Note>
+Tags are automatically:
+- Extracted from both title and body
+- Converted to lowercase
+- Cleaned of punctuation ("#urgent," becomes "urgent")
+- Deduplicated
+</Note>
+
+## Keyboard Shortcuts
+
+### Opening Quick Capture
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+X` | Open Quick Capture from any screen |
+
+### Inside Quick Capture
+
+| Key | Action |
+|-----|--------|
+| Type | Enter your note (first line = title) |
+| `Enter` | New line (multi-line input) |
+| `Ctrl+S` | Save note and close modal |
+| `Ctrl+Enter` | Save note and close modal (alternative) |
+| `Esc` | Cancel and close modal (note is NOT saved) |
+| `?` | Show help modal |
+
+<Warning>
+Pressing `Esc` discards your note. Always use `Ctrl+S` or `Ctrl+Enter` to save!
+</Warning>
+
+## Visual Design
+
+Quick Capture uses the ARCHWAVE vaporwave theme:
+
+- **Border**: Hot pink double border (`#ff6ec7`)
+- **Title**: Neon cyan with star decorations (`✦ Quick Capture ✦`)
+- **Tips**: Muted color with helpful formatting hints
+- **Input**: Multi-line textarea (5 lines, expands as you type)
+- **Help**: Context-sensitive help hints at bottom
+
+## Workflow Integration
+
+### Daily Capture Routine
+
+```
+Morning:
+  → Ctrl+X: "Goals for today #daily-planning"
+  → Ctrl+X: "Follow up on yesterday's PR review #work"
+
+During Work:
+  → Ctrl+X: "Bug in authentication flow - investigate later #bug"
+  → Ctrl+X: "Great article on React patterns (link) #reading #react"
+
+Evening:
+  → Filter notes by #quick
+  → Review and expand quick captures into full notes
+  → Remove #quick tag or delete if no longer needed
+```
+
+### Focus Session Capture
+
+```
+During Pomodoro:
+  → Idea pops up
+  → Ctrl+X (Quick Capture opens)
+  → Type thought + #idea tag
+  → Ctrl+S
+  → Back to focus (timer still running)
+```
+
+<Tip>
+Quick Capture doesn't interrupt your Focus timer. Capture and return to flow.
+</Tip>
+
+### Meeting Notes
+
+```
+During Meeting:
+  → Ctrl+X: "Action: Update API docs by Friday #action-item #urgent"
+  → Ctrl+X: "Sarah's idea: AB test the new onboarding #idea #product"
+  → Ctrl+X: "Follow up: Send design specs to team #follow-up"
+
+After Meeting:
+  → Filter by #action-item to see todos
+  → Create formal todos from quick captures
+  → Archive or expand quick notes
+```
+
+## Tips for Effective Quick Capture
+
+<Tip>
+**Keep it fast**: Quick Capture is for speed, not perfection. Capture now, refine later.
+</Tip>
+
+### Best Practices
+
+1. **First line = summary**: Make it descriptive enough to find later
+2. **Use tags liberally**: Add context with hashtags (#urgent, #idea, #work)
+3. **Include dates for time-sensitive items**: "Follow up by Friday #deadline"
+4. **Review regularly**: Process quick captures into full notes weekly
+5. **Don't overthink**: Just capture the thought and move on
+
+### What to Capture
+
+✅ **Do capture**:
+- Ideas that pop up during focused work
+- Action items from meetings
+- Links or references to check later
+- Questions to research
+- Quick reminders
+
+❌ **Don't use for**:
+- Detailed meeting notes (use Notes screen)
+- Complex project planning (use Notes + Links)
+- Task management (use Todos screen)
+- Long-form writing (use Notes screen)
+
+## Processing Quick Captures
+
+### Weekly Review
+
+<Steps>
+  <Step title="Filter by #quick tag">
+    In Notes screen, press `t` and select `#quick`
+  </Step>
+  <Step title="Review each capture">
+    Decide: Keep, Expand, Delete, or Convert to Todo
+  </Step>
+  <Step title="Process">
+    - **Keep**: Remove `#quick` tag if it's a permanent note
+    - **Expand**: Edit to add more detail, then remove `#quick`
+    - **Delete**: Remove if no longer relevant
+    - **Convert**: Create a Todo, then delete the note
+  </Step>
+  <Step title="Clear the queue">
+    Goal: Zero notes tagged with only `#quick`
+  </Step>
+</Steps>
+
+### Converting to Todos
+
+```
+Quick Capture:
+  "Call client about invoice #urgent"
+
+Process:
+  1. Read the quick capture
+  2. Press Ctrl+T (switch to Todos)
+  3. Press 'c' (create todo)
+  4. Title: "Call client about invoice"
+  5. Priority: High
+  6. Save
+  7. Return to Notes, delete the quick capture
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Ctrl+X doesn't open Quick Capture">
+    **Possible causes**:
+    - Terminal emulator intercepts Ctrl+X
+    - Keyboard shortcut conflict
+    - flowState not in focus
+    
+    **Solutions**:
+    - Check if Ctrl+X is bound to another function in your terminal
+    - Try from different screens in flowState
+    - Restart flowState
+  </Accordion>
+  
+  <Accordion title="Note saves but tags missing">
+    **Check**:
+    - Did you use `#` before the tag? (`#work` not `work`)
+    - Are tags in the text you typed? (saved in title or body)
+    - Did you press `Ctrl+S` to save? (Esc discards)
+    
+    **Verify**:
+    - Open Notes screen and view the saved note
+    - Tags appear in the note metadata
+  </Accordion>
+  
+  <Accordion title="Modal appears behind other content">
+    This is a UI rendering issue:
+    - Try resizing your terminal window
+    - Restart flowState
+    - Report as a bug if it persists
+  </Accordion>
+  
+  <Accordion title="Can't type multi-line notes">
+    **You can!** Press `Enter` for new lines.
+    
+    **To save**: `Ctrl+S` or `Ctrl+Enter` (not just Enter)
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Tips
+
+### Template-Based Capture
+
+Create capture templates in your head for common patterns:
+
+```
+Meeting Action Item:
+  "[ACTION] Do X by Y #action-item #urgent"
+
+Reading Reference:
+  "[READ] Article title (URL) #reading #topic"
+
+Idea:
+  "[IDEA] Description #idea #project-name"
+
+Bug:
+  "[BUG] What broke #bug #urgent"
+```
+
+### Tag Strategies
+
+- **#urgent**: Time-sensitive items to review today
+- **#action-item**: Things requiring action (convert to todos)
+- **#idea**: Brainstorms and creative thoughts
+- **#reading**: Articles, papers, links to check
+- **#follow-up**: Items needing future attention
+
+### Keyboard Flow Optimization
+
+```
+Optimal Quick Capture flow:
+  Ctrl+X → Type → Ctrl+S
+
+Avoid:
+  Ctrl+X → Type → Tab → Tab → Enter (unnecessary navigation)
+```
+
+<Tip>
+Master the `Ctrl+X → Type → Ctrl+S` muscle memory for lightning-fast capture.
+</Tip>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Notes" icon="note-sticky" href="/core/notes">
+    Expand your quick captures into full notes
+  </Card>
+  <Card title="Todos" icon="list-check" href="/core/todos">
+    Convert action items from quick captures to tasks
+  </Card>
+</CardGroup>
+
+## Future Enhancements
+
+Planned improvements for Quick Capture:
+
+- **Templates**: Pre-defined capture formats
+- **Quick Capture History**: See recent captures
+- **Auto-linking**: Detect and create wikilinks automatically
+- **Voice Input**: Speak to capture (with local transcription)
+- **Scheduled Review**: Automatic reminders to process captures

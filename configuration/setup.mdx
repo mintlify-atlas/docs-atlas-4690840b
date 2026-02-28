@@ -1,0 +1,209 @@
+---
+title: Setup & Installation
+description: Data directory structure, first-run setup, and model download for flowState CLI
+---
+
+flowState CLI stores all data locally in `~/.config/flowState/` with no cloud dependencies. This guide covers the data directory structure, first-run setup, and model download process.
+
+## Data Directory Structure
+
+On first run, flowState creates the following directory structure:
+
+```bash
+~/.config/flowState/
+├── flowState.db          # SQLite database (notes, todos, sessions, links)
+└── models/               # ONNX embedding models
+    └── model.onnx        # ~90MB semantic search model (downloaded on first run)
+```
+
+<Note>
+  All data is stored locally in your home directory under `.config/flowState/`. No data is sent to external servers.
+</Note>
+
+### Configuration Defaults
+
+flowState uses sensible defaults configured in `internal/config/config.go`:
+
+| Setting | Default Value | Description |
+|---------|---------------|-------------|
+| `DataDir` | `~/.config/flowState` | Base directory for all application data |
+| `DbPath` | `~/.config/flowState/flowState.db` | SQLite database file path |
+| `ModelPath` | `~/.config/flowState/models` | Directory for ONNX embedding models |
+| `QdrantUrl` | `localhost:6333` | Vector database URL (future use) |
+| `EmbeddingsEnabled` | `true` | Enable semantic search features |
+
+## First Run Setup
+
+<Steps>
+  <Step title="Initialize data directory">
+    On first launch, flowState automatically creates `~/.config/flowState/` with proper permissions (0755).
+    
+    ```go
+    dataDir := filepath.Join(homeDir, ".config", "flowState")
+    if err := os.MkdirAll(dataDir, 0755); err != nil {
+        return nil, err
+    }
+    ```
+  </Step>
+
+  <Step title="Create SQLite database">
+    The application initializes the SQLite database with tables for notes, todos, sessions, links, and note vectors.
+    
+    **Database Schema:**
+    - `notes` - Note storage with title, body, tags, timestamps
+    - `todos` - Task management with status, priority, due dates
+    - `sessions` - Focus timer sessions with duration tracking
+    - `links` - Bidirectional relationships between notes and todos
+    - `note_vectors` - BLOB storage for 384-dimensional embeddings
+  </Step>
+
+  <Step title="Download embedding model">
+    The first time you use semantic search, flowState downloads the `all-MiniLM-L6-v2` ONNX model (~90MB) to `~/.config/flowState/models/`.
+    
+    <Warning>
+      Model download requires ~100MB free disk space and an active internet connection on first run.
+    </Warning>
+  </Step>
+
+  <Step title="Launch TUI interface">
+    After initialization completes, the terminal UI launches with the home screen.
+    
+    You can now create notes, todos, and start focus sessions immediately.
+  </Step>
+</Steps>
+
+## Installation Methods
+
+<Accordion title="npm (Recommended)">
+  ```bash
+  npm install -g flowstate-cli
+  flowstate
+  ```
+
+  The npm package automatically downloads the correct binary for your platform during `postinstall`.
+
+  **Supported Platforms:**
+  - Windows (x64, ARM64)
+  - macOS (Intel x64, Apple Silicon ARM64)
+  - Linux (x64, ARM64)
+
+  <Note>
+    32-bit systems are not supported. Requires 64-bit Node.js.
+  </Note>
+</Accordion>
+
+<Accordion title="Direct Binary Download">
+  Download the latest release from [GitHub Releases](https://github.com/Jericoz-JC/flowState-CLI/releases/latest):
+
+  | Platform | File |
+  |----------|------|
+  | Windows x64 | `flowstate-windows-amd64.zip` |
+  | Windows ARM64 | `flowstate-windows-arm64.zip` |
+  | macOS Intel | `flowstate-darwin-amd64.tar.gz` |
+  | macOS Apple Silicon | `flowstate-darwin-arm64.tar.gz` |
+  | Linux x64 | `flowstate-linux-amd64.tar.gz` |
+  | Linux ARM64 | `flowstate-linux-arm64.tar.gz` |
+
+  Extract and run:
+  ```bash
+  # macOS/Linux
+  tar -xzf flowstate-*.tar.gz
+  chmod +x flowstate
+  ./flowstate
+
+  # Windows
+  # Extract ZIP and run flowstate.exe
+  ```
+</Accordion>
+
+<Accordion title="Go Install">
+  If you have Go 1.21+ installed:
+
+  ```bash
+  go install github.com/Jericoz-JC/flowState-CLI/cmd/flowState@latest
+  ```
+
+  The binary will be installed to `$(go env GOPATH)/bin/flowState`.
+</Accordion>
+
+<Accordion title="Build from Source">
+  ```bash
+  git clone https://github.com/Jericoz-JC/flowState-CLI
+  cd flowState-CLI
+  go build -o flowstate ./cmd/flowState
+  ./flowstate
+  ```
+
+  **Requirements:**
+  - Go 1.21+
+  - 512MB free RAM
+  - 200MB disk space
+</Accordion>
+
+## Model Download Details
+
+### Embedding Model Specifications
+
+| Property | Value |
+|----------|-------|
+| Model | `all-MiniLM-L6-v2` |
+| Format | ONNX |
+| Size | ~90MB |
+| Dimensions | 384 |
+| Download Location | `~/.config/flowState/models/model.onnx` |
+
+<Note>
+  The embedding model enables **semantic search** - query notes using natural language instead of exact keywords.
+</Note>
+
+### Model Download Process
+
+<Steps>
+  <Step title="Check for existing model">
+    On first semantic search, flowState checks if `~/.config/flowState/models/model.onnx` exists.
+  </Step>
+
+  <Step title="Download from GitHub releases">
+    If not found, the model is downloaded from the GitHub releases page.
+    
+    Progress is shown in the terminal during download.
+  </Step>
+
+  <Step title="Verify and cache">
+    The downloaded model is validated and cached locally.
+    
+    Subsequent runs use the cached model with no additional downloads.
+  </Step>
+</Steps>
+
+### Privacy & Security
+
+<Warning>
+  **100% Local Processing** - All embeddings are generated locally using the ONNX model. Your notes never leave your machine.
+</Warning>
+
+- No API keys required
+- No telemetry or usage tracking
+- No cloud dependencies
+- Complete offline functionality (after initial model download)
+
+## System Requirements
+
+| Component | Requirement |
+|-----------|-------------|
+| **Operating System** | Windows 10+, macOS 11+, Linux (modern distros) |
+| **RAM** | 512MB free (model uses ~100MB) |
+| **Disk Space** | 200MB (app + models) |
+| **Architecture** | 64-bit (x64 or ARM64) |
+| **Internet** | Required for initial model download only |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Customization" icon="sliders" href="/configuration/customization">
+    Learn about configuration options and theme customization
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/configuration/troubleshooting">
+    Fix common installation and runtime issues
+  </Card>
+</CardGroup>

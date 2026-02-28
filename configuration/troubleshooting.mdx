@@ -1,0 +1,656 @@
+---
+title: Troubleshooting
+description: Common installation, configuration, and runtime issues for flowState CLI
+---
+
+This guide covers common issues encountered during npm installation, binary execution, and runtime errors. Most issues stem from architecture mismatches, PATH configuration, or installation conflicts.
+
+## npm Installation Issues
+
+### ia32/x86 Architecture Error
+
+<Accordion title="Error: 32-bit Node.js detected (architecture: ia32)">
+  **Symptoms:**
+  ```bash
+  npm install -g flowstate-cli
+  # ERROR: 32-bit Node.js detected (architecture: ia32)
+  # flowstate-cli requires 64-bit Node.js
+  ```
+
+  **Root Cause:**  
+  You have 32-bit Node.js installed on a 64-bit system. This commonly happens when the wrong installer was downloaded.
+
+  **Solution:**
+
+  <Steps>
+    <Step title="Uninstall current Node.js">
+      **Windows:**
+      - Open "Add or Remove Programs"
+      - Find "Node.js" and uninstall
+
+      **macOS:**
+      ```bash
+      # Using Homebrew
+      brew uninstall node
+      
+      # Or manually delete
+      sudo rm -rf /usr/local/bin/node
+      sudo rm -rf /usr/local/lib/node_modules
+      ```
+
+      **Linux:**
+      ```bash
+      sudo apt remove nodejs  # Debian/Ubuntu
+      sudo yum remove nodejs  # RHEL/CentOS
+      ```
+    </Step>
+
+    <Step title="Download 64-bit Node.js">
+      Visit [nodejs.org](https://nodejs.org/) and download the **64-bit** installer:
+
+      **Windows:**
+      - Choose "Windows Installer (.msi)"
+      - Look for **"x64"** in the filename
+      - Example: `node-v20.x.x-x64.msi`
+
+      **macOS:**
+      - Intel Macs: Download "macOS Installer (.pkg)"
+      - Apple Silicon: Download "macOS ARM64 Installer"
+
+      **Linux:**
+      ```bash
+      # Using NodeSource repository (recommended)
+      curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+      sudo apt-get install -y nodejs
+      ```
+    </Step>
+
+    <Step title="Verify installation">
+      ```bash
+      node --version
+      # Should show v18.x.x or higher
+
+      node -p "process.arch"
+      # Should show "x64" or "arm64" (not "ia32")
+      ```
+    </Step>
+
+    <Step title="Reinstall flowstate-cli">
+      ```bash
+      npm install -g flowstate-cli
+      flowstate
+      ```
+    </Step>
+  </Steps>
+
+  **Alternative:**  
+  Download the binary directly from [GitHub Releases](https://github.com/Jericoz-JC/flowState-CLI/releases/latest) and skip npm entirely.
+</Accordion>
+
+### Unsupported Platform Error
+
+<Accordion title="Error: Unsupported platform">
+  **Symptoms:**
+  ```bash
+  Unsupported platform: win32-ia32
+  # or
+  Unsupported platform: linux-x86
+  ```
+
+  **Root Cause:**  
+  Your platform/architecture combination is not supported. flowState-cli only supports 64-bit systems.
+
+  **Supported Platforms:**
+  
+  | Platform | Architecture | Status |
+  |----------|--------------|--------|
+  | Windows | x64 | ✅ Supported |
+  | Windows | ARM64 | ✅ Supported |
+  | Windows | ia32/x86 | ❌ Not supported |
+  | macOS | x64 (Intel) | ✅ Supported |
+  | macOS | ARM64 (Apple Silicon) | ✅ Supported |
+  | Linux | x64 | ✅ Supported |
+  | Linux | ARM64 | ✅ Supported |
+  | Linux | ia32/x86 | ❌ Not supported |
+
+  <Warning>
+    32-bit systems are not supported due to ONNX model requirements. You must use a 64-bit system.
+  </Warning>
+
+  **Solution:**  
+  If you have a 64-bit system, install 64-bit Node.js (see ia32 error above). If you have a 32-bit system, flowState-cli will not run.
+</Accordion>
+
+### Binary Download Failed
+
+<Accordion title="Error: Failed to download binary">
+  **Symptoms:**
+  ```bash
+  Installation failed: Failed to download: 404
+  # or
+  Error: ENOTFOUND github.com
+  ```
+
+  **Root Causes:**
+  1. Network connectivity issues
+  2. GitHub release doesn't exist
+  3. Firewall/proxy blocking download
+
+  **Solutions:**
+
+  <Steps>
+    <Step title="Check internet connection">
+      ```bash
+      curl https://github.com
+      # Should return HTML (not an error)
+      ```
+    </Step>
+
+    <Step title="Verify release exists">
+      Visit the release page manually:
+      ```
+      https://github.com/Jericoz-JC/flowState-CLI/releases
+      ```
+
+      Check if the version in `npm/package.json` matches a published release.
+    </Step>
+
+    <Step title="Configure npm proxy (if behind firewall)">
+      ```bash
+      npm config set proxy http://proxy.company.com:8080
+      npm config set https-proxy http://proxy.company.com:8080
+      ```
+    </Step>
+
+    <Step title="Manual installation">
+      Download the binary manually:
+      
+      1. Visit [Releases](https://github.com/Jericoz-JC/flowState-CLI/releases/latest)
+      2. Download `flowstate-{platform}-{arch}.{ext}`
+      3. Extract to `~/.npm-packages/lib/node_modules/flowstate-cli/bin/`
+      4. Make executable: `chmod +x flowstate` (Unix)
+    </Step>
+  </Steps>
+</Accordion>
+
+## Command Not Found Issues
+
+### Linux/macOS: "flowstate: command not found"
+
+<Accordion title="Error: flowstate: command not found (Linux/macOS)">
+  **Symptoms:**
+  ```bash
+  npm install -g flowstate-cli
+  # Installation successful
+  
+  flowstate
+  # bash: flowstate: command not found
+  ```
+
+  **Root Cause:**  
+  npm's global bin directory is not in your `$PATH` environment variable.
+
+  **Quick Fix (Temporary):**
+  ```bash
+  npx flowstate
+  # This always works without PATH configuration
+  ```
+
+  **Permanent Fix:**
+
+  <Steps>
+    <Step title="Find npm global bin directory">
+      ```bash
+      npm config get prefix
+      # Example output: /home/username/.npm-packages
+      ```
+    </Step>
+
+    <Step title="Add to PATH">
+      Add this line to your shell configuration file:
+
+      **Bash** (`~/.bashrc` or `~/.bash_profile`):
+      ```bash
+      export PATH="$(npm config get prefix)/bin:$PATH"
+      ```
+
+      **Zsh** (`~/.zshrc`):
+      ```bash
+      export PATH="$(npm config get prefix)/bin:$PATH"
+      ```
+
+      **Fish** (`~/.config/fish/config.fish`):
+      ```fish
+      set -gx PATH (npm config get prefix)/bin $PATH
+      ```
+    </Step>
+
+    <Step title="Reload shell configuration">
+      ```bash
+      # Bash
+      source ~/.bashrc
+
+      # Zsh
+      source ~/.zshrc
+
+      # Or just restart your terminal
+      ```
+    </Step>
+
+    <Step title="Verify PATH">
+      ```bash
+      which flowstate
+      # Should show: /home/username/.npm-packages/bin/flowstate
+
+      flowstate
+      # Should launch the app
+      ```
+    </Step>
+  </Steps>
+
+  <Note>
+    If you use multiple shells (bash + zsh), add the PATH export to both configuration files.
+  </Note>
+</Accordion>
+
+### Windows: "'flowstate' is not recognized"
+
+<Accordion title="Error: 'flowstate' is not recognized (Windows)">
+  **Symptoms:**
+  ```bash
+  npm install -g flowstate-cli
+  flowstate
+  # 'flowstate' is not recognized as an internal or external command
+  ```
+
+  **Root Cause:**  
+  npm's global bin directory is not in your `PATH` environment variable.
+
+  **Quick Fix (Temporary):**
+  ```bash
+  npx flowstate
+  ```
+
+  **Permanent Fix:**
+
+  <Steps>
+    <Step title="Find npm global bin directory">
+      ```bash
+      npm config get prefix
+      # Example: C:\Users\YourName\AppData\Roaming\npm
+      ```
+    </Step>
+
+    <Step title="Add to PATH (GUI method)">
+      1. Open "Edit the system environment variables"
+      2. Click "Environment Variables..."
+      3. Under "User variables", select "Path" and click "Edit..."
+      4. Click "New" and add the npm prefix path
+      5. Click "OK" on all dialogs
+    </Step>
+
+    <Step title="Add to PATH (PowerShell method)">
+      ```powershell
+      # Get npm prefix
+      $npmPrefix = npm config get prefix
+      
+      # Add to user PATH
+      [Environment]::SetEnvironmentVariable(
+          "Path",
+          [Environment]::GetEnvironmentVariable("Path", "User") + ";$npmPrefix",
+          "User"
+      )
+      ```
+    </Step>
+
+    <Step title="Restart terminal and verify">
+      Close and reopen your terminal, then:
+      ```bash
+      where flowstate
+      # Should show: C:\Users\...\npm\flowstate.cmd
+
+      flowstate
+      # Should launch the app
+      ```
+    </Step>
+  </Steps>
+</Accordion>
+
+## Binary Execution Issues
+
+### Binary Not Found After Install
+
+<Accordion title="Error: flowstate binary not found">
+  **Symptoms:**
+  ```bash
+  flowstate
+  # ERROR: flowstate binary not found
+  # Expected location: /path/to/npm/lib/node_modules/flowstate-cli/bin/flowstate
+  ```
+
+  **Root Cause:**  
+  The binary download failed during `npm install` postinstall script, but npm didn't report the error.
+
+  **Solution:**
+
+  <Steps>
+    <Step title="Check binary existence">
+      ```bash
+      # Unix
+      ls -la $(npm root -g)/flowstate-cli/bin/
+      
+      # Windows
+      dir "%APPDATA%\npm\node_modules\flowstate-cli\bin"
+      ```
+
+      If empty or missing `flowstate` binary, the download failed.
+    </Step>
+
+    <Step title="Reinstall with verbose output">
+      ```bash
+      npm uninstall -g flowstate-cli
+      npm install -g flowstate-cli --verbose
+      # Look for errors in the postinstall script
+      ```
+    </Step>
+
+    <Step title="Manual binary installation">
+      1. Download from [GitHub Releases](https://github.com/Jericoz-JC/flowState-CLI/releases/latest)
+      2. Extract the binary
+      3. Copy to npm module directory:
+         ```bash
+         # Unix
+         cp flowstate $(npm root -g)/flowstate-cli/bin/
+         chmod +x $(npm root -g)/flowstate-cli/bin/flowstate
+
+         # Windows
+         copy flowstate.exe "%APPDATA%\npm\node_modules\flowstate-cli\bin\"
+         ```
+    </Step>
+  </Steps>
+</Accordion>
+
+### Permission Denied (EACCES)
+
+<Accordion title="Error: EACCES permission denied">
+  **Symptoms:**
+  ```bash
+  flowstate
+  # Failed to start flowstate: EACCES permission denied
+  ```
+
+  **Root Cause:**  
+  The binary file is not executable (Unix) or lacks execution permissions.
+
+  **Solution:**
+
+  **Unix (Linux/macOS):**
+  ```bash
+  chmod +x $(npm root -g)/flowstate-cli/bin/flowstate
+  ```
+
+  **Windows (Run as Administrator):**
+  1. Right-click terminal/PowerShell
+  2. Select "Run as Administrator"
+  3. Run `flowstate` again
+
+  <Warning>
+    On Unix, if you installed npm packages as root (using `sudo npm install -g`), you may need to reinstall as your user to avoid permission issues.
+  </Warning>
+</Accordion>
+
+## Version Conflict Issues
+
+### Old Version Running After Update
+
+<Accordion title="Error: Old version runs instead of new version">
+  **Symptoms:**
+  ```bash
+  npm install -g flowstate-cli@latest
+  flowstate
+  # Shows old version number in UI
+  ```
+
+  **Root Causes:**
+  1. Multiple installations in different locations
+  2. PATH priority issues
+  3. Binary caching
+
+  **Solution:**
+
+  <Steps>
+    <Step title="Check installation locations">
+      ```bash
+      # Unix
+      which -a flowstate
+      # Shows all installations in PATH
+
+      # Windows
+      where flowstate
+      ```
+
+      If multiple paths are shown, the first one takes priority.
+    </Step>
+
+    <Step title="Uninstall all versions">
+      ```bash
+      npm uninstall -g flowstate-cli
+      
+      # Verify removal
+      which flowstate  # Should show nothing
+      ```
+
+      If `which flowstate` still shows a path, manually delete it:
+      ```bash
+      rm $(which flowstate)
+      ```
+    </Step>
+
+    <Step title="Clean npm cache">
+      ```bash
+      npm cache clean --force
+      ```
+    </Step>
+
+    <Step title="Reinstall latest version">
+      ```bash
+      npm install -g flowstate-cli@latest
+      flowstate
+      ```
+    </Step>
+  </Steps>
+
+  <Note>
+    If you built from source with `go build`, the binary in your project directory may conflict with the npm version. Always use `which flowstate` to check which binary is running.
+  </Note>
+</Accordion>
+
+### Go Build vs npm Binary Conflict
+
+<Accordion title="Error: go build version conflicts with npm version">
+  **Symptoms:**
+  - Ran `go build` in the source directory
+  - Installed via `npm install -g flowstate-cli`
+  - Running `flowstate` launches the wrong version
+
+  **Root Cause:**  
+  `$GOPATH/bin/flowState` takes precedence over npm's global bin in your PATH.
+
+  **Solution:**
+
+  <Steps>
+    <Step title="Check which binary is running">
+      ```bash
+      which flowstate
+      # or
+      type flowstate
+      ```
+    </Step>
+
+    <Step title="Option 1: Remove Go binary">
+      ```bash
+      rm $(go env GOPATH)/bin/flowState
+      ```
+    </Step>
+
+    <Step title="Option 2: Reorder PATH">
+      Put npm bin **before** GOPATH/bin in your PATH:
+
+      ```bash
+      # In ~/.bashrc or ~/.zshrc
+      export PATH="$(npm config get prefix)/bin:$(go env GOPATH)/bin:$PATH"
+      ```
+    </Step>
+
+    <Step title="Option 3: Use full path">
+      ```bash
+      # Always use npm version
+      alias flowstate="$(npm root -g)/flowstate-cli/bin/flowstate"
+      ```
+    </Step>
+  </Steps>
+</Accordion>
+
+## Runtime Errors
+
+### Database Errors
+
+<Accordion title="Error: Failed to load config / database errors">
+  **Symptoms:**
+  ```bash
+  flowstate
+  # Failed to load config: permission denied
+  # or
+  # database is locked
+  ```
+
+  **Solutions:**
+
+  <Steps>
+    <Step title="Check directory permissions">
+      ```bash
+      ls -la ~/.config/flowState/
+      # Should be owned by your user, not root
+      ```
+
+      If owned by root:
+      ```bash
+      sudo chown -R $USER:$USER ~/.config/flowState/
+      ```
+    </Step>
+
+    <Step title="Check for running instances">
+      ```bash
+      # Unix
+      ps aux | grep flowstate
+      kill <PID>  # If stuck process found
+
+      # Windows
+      tasklist | findstr flowstate
+      taskkill /F /PID <PID>
+      ```
+    </Step>
+
+    <Step title="Reset database (last resort)">
+      <Warning>
+        This deletes all notes, todos, and session history.
+      </Warning>
+
+      ```bash
+      mv ~/.config/flowState/flowState.db ~/.config/flowState/flowState.db.bak
+      flowstate  # Will create new database
+      ```
+    </Step>
+  </Steps>
+</Accordion>
+
+### Model Download Errors
+
+<Accordion title="Error: Failed to download embedding model">
+  **Symptoms:**
+  ```bash
+  # First run or first semantic search
+  ERROR: Failed to download model: connection timeout
+  ```
+
+  **Solutions:**
+
+  <Steps>
+    <Step title="Check internet connection">
+      ```bash
+      curl -I https://github.com
+      # Should return 200 OK
+      ```
+    </Step>
+
+    <Step title="Check disk space">
+      ```bash
+      df -h ~/.config/flowState/models
+      # Need at least 100MB free
+      ```
+    </Step>
+
+    <Step title="Disable embeddings temporarily">
+      Edit `internal/config/config.go`:
+      ```go
+      EmbeddingsEnabled: false,  // Set to false
+      ```
+
+      Then rebuild:
+      ```bash
+      go build -o flowstate ./cmd/flowState
+      ```
+    </Step>
+
+    <Step title="Manual model download">
+      1. Download model from releases
+      2. Place in `~/.config/flowState/models/model.onnx`
+      3. Restart flowstate
+    </Step>
+  </Steps>
+</Accordion>
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="GitHub Issues" icon="github" href="https://github.com/Jericoz-JC/flowState-CLI/issues">
+    Report bugs and request features
+  </Card>
+  <Card title="Setup Guide" icon="book" href="/configuration/setup">
+    Review installation and setup steps
+  </Card>
+</CardGroup>
+
+### Before Reporting an Issue
+
+<Steps>
+  <Step title="Check version">
+    ```bash
+    flowstate --version
+    npm list -g flowstate-cli
+    ```
+  </Step>
+
+  <Step title="Check debug logs">
+    ```bash
+    cat debug.log
+    # Located in the directory where you run flowstate
+    ```
+  </Step>
+
+  <Step title="Include system info">
+    ```bash
+    # Platform and architecture
+    uname -a  # Unix
+    systeminfo  # Windows
+
+    # Node version
+    node --version
+    node -p "process.platform + '-' + process.arch"
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  When reporting issues, include: platform/arch, Node version, npm version, error messages, and debug.log contents.
+</Note>

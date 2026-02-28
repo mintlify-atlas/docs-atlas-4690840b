@@ -1,0 +1,523 @@
+---
+title: Contributing
+description: Development setup, testing, and code style guidelines for flowState CLI
+---
+
+## Welcome Contributors!
+
+flowState CLI is built with Go and follows strict Test-Driven Development (TDD) practices. This guide will help you get started with contributing.
+
+## Development Setup
+
+### Prerequisites
+
+<CardGroup cols={2}>
+  <Card title="Go 1.22+" icon="golang">
+    Download from [go.dev](https://go.dev/dl/)
+    
+    Verify: `go version`
+  </Card>
+  
+  <Card title="Git" icon="git">
+    Standard git installation
+    
+    Verify: `git --version`
+  </Card>
+  
+  <Card title="GoReleaser (optional)" icon="rocket">
+    For testing release builds
+    
+    Install: `go install github.com/goreleaser/goreleaser@latest`
+  </Card>
+  
+  <Card title="Air (optional)" icon="wind">
+    Hot reload during development
+    
+    Install: `go install github.com/cosmtrek/air@latest`
+  </Card>
+</CardGroup>
+
+### Clone & Build
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/Jericoz-JC/flowState-CLI
+    cd flowState-CLI
+    ```
+  </Step>
+  
+  <Step title="Download dependencies">
+    ```bash
+    go mod download
+    ```
+    
+    This fetches all Go modules defined in `go.mod`:
+    - Bubble Tea (TUI framework)
+    - Lip Gloss (styling)
+    - SQLite (database)
+    - ~30 transitive dependencies
+  </Step>
+  
+  <Step title="Build the binary">
+    ```bash
+    go build -o flowstate ./cmd/flowState
+    ```
+    
+    This creates a `flowstate` binary in the current directory.
+  </Step>
+  
+  <Step title="Run the application">
+    ```bash
+    ./flowstate
+    ```
+    
+    First run will initialize the SQLite database and download the embedding model (~90MB).
+  </Step>
+</Steps>
+
+## Running Tests
+
+### Test Commands
+
+```bash
+# Run all tests
+go test ./...
+
+# Run tests with verbose output
+go test -v ./...
+
+# Run tests for a specific package
+go test ./internal/tui/screens/
+
+# Run tests with coverage report
+go test -cover ./...
+
+# Run a specific test by name
+go test -run TestNotesScreenRender ./internal/tui/screens/
+```
+
+### Test Organization
+
+Tests live alongside source files with `_test.go` suffix:
+
+```
+internal/tui/screens/
+├── notes.go          # Implementation
+└── notes_test.go     # Tests
+```
+
+**Current test coverage:**
+- `internal/tui/screens/` - ✅ Well covered
+- `internal/tui/components/` - ✅ Well covered
+- `internal/tui/styles/` - ✅ Theme tests added
+- `internal/config/` - ⚠️ Needs tests
+- `internal/models/` - ⚠️ Needs tests
+- `internal/commands/` - ⚠️ Needs tests
+
+<Note>
+We welcome contributions to improve test coverage! See [Technical Debt](#technical-debt) section.
+</Note>
+
+## Test-Driven Development (TDD)
+
+<Warning>
+**MANDATORY:** All new features MUST follow TDD. No exceptions.
+</Warning>
+
+### The RED-GREEN-REFACTOR Cycle
+
+<Steps>
+  <Step title="🔴 RED - Write a failing test">
+    ```go
+    func TestParseWikilinks(t *testing.T) {
+        input := "see [[Note Title]]"
+        result := parseWikilinks(input)
+        expected := []string{"Note Title"}
+        
+        if !reflect.DeepEqual(result, expected) {
+            t.Errorf("got %v, want %v", result, expected)
+        }
+    }
+    ```
+    
+    Run the test and **verify it fails for the RIGHT reason** (missing function, not syntax error).
+  </Step>
+  
+  <Step title="✅ GREEN - Implement minimal code to pass">
+    ```go
+    func parseWikilinks(text string) []string {
+        re := regexp.MustCompile(`\[\[([^\]]+)\]\]`)
+        matches := re.FindAllStringSubmatch(text, -1)
+        
+        var links []string
+        for _, match := range matches {
+            links = append(links, match[1])
+        }
+        return links
+    }
+    ```
+    
+    Run the test again and verify it passes. Run **ALL** tests to ensure nothing broke.
+  </Step>
+  
+  <Step title="🔄 REFACTOR - Clean up while maintaining green">
+    ```go
+    // Extract regex to package constant
+    var wikilinkRegex = regexp.MustCompile(`\[\[([^\]]+)\]\]`)
+    
+    func parseWikilinks(text string) []string {
+        matches := wikilinkRegex.FindAllStringSubmatch(text, -1)
+        // ... rest of implementation
+    }
+    ```
+    
+    Tests still pass after refactoring!
+  </Step>
+</Steps>
+
+### Table-Driven Tests (Preferred Pattern)
+
+Go's idiomatic testing pattern:
+
+```go
+func TestExtractTags(t *testing.T) {
+    tests := []struct {
+        name     string
+        input    string
+        expected []string
+    }{
+        {
+            name:     "empty string",
+            input:    "",
+            expected: nil,
+        },
+        {
+            name:     "single hashtag",
+            input:    "hello #world",
+            expected: []string{"world"},
+        },
+        {
+            name:     "multiple tags",
+            input:    "#go #programming @mentions",
+            expected: []string{"go", "programming", "mentions"},
+        },
+        {
+            name:     "tags in title and body",
+            input:    "#title\n\nBody with #tag",
+            expected: []string{"title", "tag"},
+        },
+    }
+    
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            result := extractTags(tt.input)
+            if !reflect.DeepEqual(result, tt.expected) {
+                t.Errorf("got %v, want %v", result, tt.expected)
+            }
+        })
+    }
+}
+```
+
+**Benefits:**
+- Easy to add new test cases
+- Clear test names with `t.Run()`
+- Isolated test execution
+- Comprehensive edge case coverage
+
+### Red Flags - STOP and RESTART
+
+<Warning>
+If any of these occur, you're doing it wrong:
+
+- ❌ You wrote production code before the test
+- ❌ The test passed immediately (didn't test anything new)
+- ❌ You can't explain why the test should fail
+- ❌ You skipped running tests after implementation
+</Warning>
+
+## Code Style Guidelines
+
+### Go Formatting
+
+```bash
+# Format all code (automatically fixes style)
+go fmt ./...
+
+# Run linter (requires golangci-lint)
+golangci-lint run
+```
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|----------|
+| **Packages** | Lowercase, single word | `screens`, `models`, `storage` |
+| **Types** | PascalCase | `NotesModel`, `TodoItem` |
+| **Functions** | camelCase (private), PascalCase (public) | `parseWikilinks()`, `GetNotes()` |
+| **Constants** | PascalCase or SCREAMING_SNAKE_CASE | `MaxItemsPerPage`, `DEFAULT_TIMEOUT` |
+| **Variables** | camelCase | `currentNote`, `isEditing` |
+
+### Bubble Tea Patterns
+
+All screens follow this structure:
+
+```go
+package screens
+
+import (
+    tea "github.com/charmbracelet/bubbletea"
+)
+
+// Message types (private)
+type notesLoadedMsg struct {
+    notes []models.Note
+    err   error
+}
+
+// Model (exported)
+type NotesModel struct {
+    // State fields
+    notes  []models.Note
+    cursor int
+    
+    // Dependencies (injected)
+    store storage.Store
+}
+
+// Constructor
+func NewNotesModel(store storage.Store) NotesModel {
+    return NotesModel{
+        store: store,
+    }
+}
+
+// Bubble Tea interface
+func (m NotesModel) Init() tea.Cmd {
+    return nil  // or return a command
+}
+
+func (m NotesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+    // Handle messages
+    return m, nil
+}
+
+func (m NotesModel) View() string {
+    // Render UI
+    return "..."
+}
+```
+
+### Error Handling
+
+```go
+// Return errors, don't panic
+func loadNotes(store storage.Store) ([]models.Note, error) {
+    notes, err := store.GetNotes()
+    if err != nil {
+        return nil, fmt.Errorf("failed to load notes: %w", err)
+    }
+    return notes, nil
+}
+
+// Handle errors in Update()
+case notesLoadedMsg:
+    if msg.err != nil {
+        m.errorMessage = msg.err.Error()
+        return m, nil
+    }
+    m.notes = msg.notes
+    return m, nil
+```
+
+## Development Workflow
+
+### Hot Reload with Air
+
+```bash
+# Install Air
+go install github.com/cosmtrek/air@latest
+
+# Run with auto-reload
+air
+```
+
+Air watches for file changes and automatically rebuilds the binary.
+
+### Manual Build Loop
+
+```bash
+# Build and run in one command
+go build -o flowstate ./cmd/flowState && ./flowstate
+
+# Or use a shell script
+#!/bin/bash
+while true; do
+    go build -o flowstate ./cmd/flowState
+    ./flowstate
+    echo "Press Ctrl+C to exit or any key to rebuild"
+    read
+done
+```
+
+### Debug Logging
+
+```go
+// Add debug logging (remove before commit)
+import "log"
+
+log.Printf("DEBUG: Current mode: %v", m.mode)
+log.Printf("DEBUG: Cursor position: %d", m.cursor)
+```
+
+<Warning>
+Remove debug logs before committing! Use a proper logging package for production logging.
+</Warning>
+
+## Systematic Debugging
+
+When fixing bugs, follow this process:
+
+<Steps>
+  <Step title="Root Cause Investigation">
+    - Read the error message carefully
+    - Reproduce the issue consistently
+    - Trace data flow through the code
+    - Use `log.Printf()` to inspect values
+  </Step>
+  
+  <Step title="Pattern Analysis">
+    - Find working examples of similar code
+    - Identify differences between working and broken code
+    - Check for common pitfalls (nil pointers, empty slices, etc.)
+  </Step>
+  
+  <Step title="Hypothesis Testing">
+    - Make ONE change at a time
+    - Test after each change
+    - Document what you tried
+  </Step>
+  
+  <Step title="Implementation">
+    - Write a failing test that reproduces the bug
+    - Implement the fix
+    - Verify the test passes
+    - Run ALL tests to ensure no regressions
+  </Step>
+</Steps>
+
+<Warning>
+**Never propose fixes without understanding the root cause first.**
+</Warning>
+
+## Technical Debt
+
+Areas needing improvement (great for first contributions!):
+
+### High Priority
+
+<AccordionGroup>
+  <Accordion title="Test Coverage for Core Packages">
+    These packages need tests:
+    - `internal/commands/` - Command wrappers
+    - `internal/config/` - Configuration loading
+    - `internal/models/` - Data models
+    
+    Start with simple unit tests for pure functions.
+  </Accordion>
+  
+  <Accordion title="Remove Dead Code">
+    `internal/storage/qdrant/` is effectively dead code (in-memory, data lost on restart).
+    
+    Either:
+    - Remove the package entirely
+    - Document it as a development stub
+    - Implement proper Qdrant integration
+  </Accordion>
+</AccordionGroup>
+
+### Medium Priority
+
+<AccordionGroup>
+  <Accordion title="Extract Common Patterns">
+    `notes.go` (~1,400 lines) and `todos.go` (~1,119 lines) have duplicate logic:
+    - Tag filtering
+    - Sort modes
+    - Search filtering
+    
+    Extract to `internal/tui/filters/` package.
+  </Accordion>
+  
+  <Accordion title="Fix TODO Comments">
+    Only 2 TODOs in the codebase:
+    ```
+    notes.go:472:  // TODO: proper cursor handling
+    notes.go:562:  // TODO: Show error message
+    ```
+    
+    Straightforward fixes for these.
+  </Accordion>
+</AccordionGroup>
+
+## Pull Request Process
+
+<Steps>
+  <Step title="Create a feature branch">
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
+  </Step>
+  
+  <Step title="Write tests first (TDD)">
+    Follow the RED-GREEN-REFACTOR cycle.
+  </Step>
+  
+  <Step title="Implement the feature">
+    Keep commits atomic and descriptive.
+  </Step>
+  
+  <Step title="Run the full test suite">
+    ```bash
+    go test ./...
+    go fmt ./...
+    ```
+  </Step>
+  
+  <Step title="Update documentation">
+    If your feature is user-facing, update:
+    - README.md (user guide)
+    - CLAUDE.md (development plan)
+  </Step>
+  
+  <Step title="Push and create PR">
+    ```bash
+    git push origin feature/your-feature-name
+    ```
+    
+    Open a PR on GitHub with:
+    - Clear description of changes
+    - Link to related issues
+    - Screenshots/GIFs for UI changes
+  </Step>
+</Steps>
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="GitHub Issues" icon="github">
+    Report bugs or request features at:
+    
+    [github.com/Jericoz-JC/flowState-CLI/issues](https://github.com/Jericoz-JC/flowState-CLI/issues)
+  </Card>
+  
+  <Card title="Discussions" icon="comments">
+    Ask questions in GitHub Discussions:
+    
+    [github.com/Jericoz-JC/flowState-CLI/discussions](https://github.com/Jericoz-JC/flowState-CLI/discussions)
+  </Card>
+</CardGroup>
+
+<Note>
+See the [Release Process](/development/releasing) guide for information on cutting releases (maintainers only).
+</Note>

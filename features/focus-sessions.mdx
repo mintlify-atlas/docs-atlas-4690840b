@@ -1,0 +1,428 @@
+---
+title: 'Focus Sessions'
+description: 'Pomodoro timer with work/break cycles, session history, and streak tracking'
+---
+
+## Overview
+
+The Focus Sessions feature is a Pomodoro-style timer that helps you maintain concentration with structured work/break cycles. Track your productivity with session history, daily statistics, and streak counters.
+
+<Note>
+  Focus sessions are saved to the database only when completed successfully. Cancelled sessions are discarded.
+</Note>
+
+## Timer Modes
+
+The focus timer has four distinct modes:
+
+<CardGroup cols={2}>
+  <Card title="Idle" icon="circle" color="#b794f6">
+    **Ready to Focus**
+    
+    Default state. Configure duration, view stats, or start a session.
+    
+    Press **s** to start
+  </Card>
+  
+  <Card title="Running" icon="circle" color="#6bcf7f">
+    **Work Session**
+    
+    Timer actively counting down. Large ASCII display shows remaining time.
+    
+    Press **p** to pause, **c** to cancel, **b** to skip to break
+  </Card>
+  
+  <Card title="Paused" icon="circle" color="#ffd93d">
+    **Paused**
+    
+    Timer stopped mid-session. Resume or cancel.
+    
+    Press **s** to resume, **c** to cancel
+  </Card>
+  
+  <Card title="Break" icon="circle" color="#56ccf2">
+    **Break Time**
+    
+    Short break after completing a work session.
+    
+    Press **b** or **Esc** to skip break
+  </Card>
+</CardGroup>
+
+## Starting a Session
+
+<Steps>
+  <Step title="Set duration (optional)">
+    Press **d** to open the duration picker. Default is 25 min work / 5 min break.
+  </Step>
+  
+  <Step title="Start the timer">
+    Press **s** to start the work session. The timer begins counting down immediately.
+  </Step>
+  
+  <Step title="Stay focused">
+    Work until the timer completes. A large ASCII timer shows remaining time.
+  </Step>
+  
+  <Step title="Take a break">
+    When the work session ends, the break timer starts automatically.
+  </Step>
+</Steps>
+
+<Tip>
+  Sessions are only saved when completed. If you cancel (press **c**), the session is discarded.
+</Tip>
+
+## Duration Picker
+
+Press **d** from idle mode to customize work and break durations.
+
+### Preset Durations
+
+<Tabs>
+  <Tab title="Work Durations">
+    - **15 min** - Short burst
+    - **25 min** - Classic Pomodoro (default)
+    - **45 min** - Extended focus
+    - **60 min** - Deep work
+  </Tab>
+  
+  <Tab title="Break Durations">
+    - **5 min** - Quick break (default)
+    - **10 min** - Standard break
+    - **15 min** - Long break
+  </Tab>
+</Tabs>
+
+### Picker Controls
+
+| Key | Action |
+|-----|--------|
+| **←/→** or **h/l** | Adjust duration (auto-saves and auto-exits after 500ms) |
+| **Tab** | Switch between work/break duration |
+| **Enter** | Done - exit immediately |
+| **Esc** | Cancel and exit |
+
+<Note>
+  **Auto-save UX:** When you press arrow keys to change duration, the picker shows "✓ Saved" briefly, then auto-exits after 500ms. No need to press Enter!
+</Note>
+
+<Accordion title="Duration Picker Implementation Details">
+  From `internal/tui/screens/focus.go:380-407`:
+  
+  ```go
+  func (m *FocusModel) applySelectedDuration(durations []int) tea.Cmd {
+      if m.selectingWork {
+          m.workDuration = durations[m.durationIndex]
+          m.remaining = time.Duration(m.workDuration) * time.Minute
+          m.totalDuration = m.remaining
+          m.lastChangedField = "work"
+      } else {
+          m.breakDuration = durations[m.durationIndex]
+          m.lastChangedField = "break"
+      }
+
+      // Show "Saved" indicator
+      m.durationJustChanged = true
+
+      // Increment sequence to cancel pending auto-exit timers
+      m.autoExitSequence++
+      currentSequence := m.autoExitSequence
+
+      // Return commands: clear feedback after 300ms, auto-exit after 500ms
+      return tea.Batch(
+          tea.Tick(300*time.Millisecond, func(t time.Time) tea.Msg {
+              return clearFeedbackMsg{}
+          }),
+          tea.Tick(500*time.Millisecond, func(t time.Time) tea.Msg {
+              return autoExitDurationMsg{sequence: currentSequence}
+          }),
+      )
+  }
+  ```
+</Accordion>
+
+## Visual Display
+
+### Large ASCII Timer
+
+The timer displays remaining time as large 5-line ASCII art digits:
+
+```
+╔════════════════════════════╗
+║   🍅  W O R K   S E S S I O N  🍅   ║
+╚════════════════════════════╝
+
+  ██████   ██████      ██  ██  ██████  
+      ██  ██            ██  ██  ██      
+  ██████  ██████  ██    ████    ██████  
+  ██          ██        ██  ██      ██  
+  ██████  ██████        ██  ██  ██████  
+       2 4 : 1 5
+```
+
+<Note>
+  Timer color changes by mode: Cyan (running), Teal (break), Yellow (paused), Lavender (idle).
+</Note>
+
+### Progress Ring
+
+A gradient progress bar shows completion:
+
+```
+【▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░】 65%
+```
+
+- Gradient fill: cyan → pink as progress increases
+- Japanese brackets 【】 for visual style
+- Percentage displayed alongside
+
+### Session Count Indicator
+
+Shows today's completed sessions:
+
+```
+Today's Sessions: ● ● ● ● ○ ○ ○ ○
+```
+
+- **●** Completed sessions
+- **○** Remaining (up to 8 total shown)
+
+## Statistics & History
+
+### Stats Summary
+
+Displayed in idle mode:
+
+```
+Today: 4  │  Streak: 7 days 🔥  │  Total: 12h 30m
+```
+
+- **Today** - Sessions completed today
+- **Streak** - Consecutive days with at least one session
+- **Total** - Lifetime focus minutes
+
+### 7-Day Activity Chart
+
+Shown in idle mode below stats:
+
+```
+Last 7 Days:
+     ║
+   8 ║     ▄
+     ║ ▄   █   ▄
+   4 ║ █   █ ▄ █ ▄ █
+     ║ █ ▄ █ █ █ █ █
+   0 ╠═════════════════
+     M T W T F S S
+```
+
+- Bar chart of daily session counts
+- Today's bar highlighted in accent color
+- Day labels (M T W T F S S)
+
+### History View
+
+Press **h** to view full session history:
+
+<Accordion title="History List Format">
+  ```
+  ✓ 2026-01-13 14:30 - 25 min
+    Actual: 25 min
+  
+  ✓ 2026-01-13 10:15 - 45 min
+    Actual: 43 min
+  
+  ○ 2026-01-12 16:00 - 25 min
+    In progress
+  ```
+  
+  **Status icons:**
+  - **✓** Completed
+  - **✗** Cancelled
+  - **●** Running
+  
+  **Keyboard shortcuts:**
+  - **d** - Delete selected session
+  - **h** or **Esc** - Return to timer
+</Accordion>
+
+## Keyboard Shortcuts
+
+### Timer Controls
+
+| Key | Action | Available In |
+|-----|--------|-------------|
+| **s** | Start timer / Resume | Idle, Paused |
+| **p** | Pause timer | Running |
+| **c** | Cancel session | Running, Paused, Break |
+| **b** | Skip to break / Skip break | Running, Break |
+| **d** | Open duration picker | Idle |
+| **h** | Toggle history view | Idle |
+| **Esc** | Return to idle / Cancel | Break, Any |
+
+### Duration Picker
+
+| Key | Action |
+|-----|--------|
+| **←/→** | Adjust duration (auto-saves, auto-exits) |
+| **h/l** | Adjust duration (Vim-style) |
+| **Tab** | Switch work ↔ break |
+| **Enter** | Confirm and exit |
+| **Esc** | Cancel |
+
+## Code Examples
+
+### Session Data Structure
+
+From `internal/models/models.go:110-131`:
+
+```go
+type FocusSession struct {
+    ID        int64         `json:"id"`
+    StartTime time.Time     `json:"start_time"`
+    EndTime   *time.Time    `json:"end_time,omitempty"`
+    Duration  int           `json:"duration"` // seconds
+    Status    SessionStatus `json:"status"`
+    CreatedAt time.Time     `json:"created_at"`
+}
+
+const (
+    SessionStatusRunning   SessionStatus = "running"
+    SessionStatusCompleted SessionStatus = "completed"
+    SessionStatusCancelled SessionStatus = "cancelled"
+)
+```
+
+### Session Completion Logic
+
+From `internal/tui/screens/focus.go:206-237`:
+
+```go
+func (m *FocusModel) handleTimerComplete() (FocusModel, tea.Cmd) {
+    if m.mode == FocusModeRunning {
+        // Work session completed - NOW save to database
+        now := time.Now()
+        if m.currentSession != nil {
+            m.currentSession.EndTime = &now
+            m.currentSession.Status = models.SessionStatusCompleted
+            // Create the session in DB only on completion
+            if err := m.store.CreateSession(m.currentSession); err != nil {
+                // Log error but continue
+            }
+        }
+
+        // Start break
+        m.mode = FocusModeBreak
+        m.remaining = time.Duration(m.breakDuration) * time.Minute
+        m.totalDuration = m.remaining
+        m.currentSession = nil
+
+        return *m, tickCmd()
+    } else if m.mode == FocusModeBreak {
+        // Break completed - return to idle
+        m.mode = FocusModeIdle
+        m.remaining = time.Duration(m.workDuration) * time.Minute
+        m.totalDuration = m.remaining
+        m.LoadHistory() // Refresh stats
+
+        return *m, nil
+    }
+
+    return *m, nil
+}
+```
+
+### ASCII Timer Rendering
+
+From `internal/tui/styles/theme.go` (referenced in focus.go:614):
+
+```go
+func RenderASCIITime(timeStr string, color lipgloss.Color) string {
+    // Renders time as 5-line tall ASCII art digits
+    // Uses box-drawing characters for digit shapes
+    // Each digit is ~8 chars wide
+    // Example: "24:15" becomes large ASCII art
+    // ...
+}
+```
+
+## Best Practices
+
+<Accordion title="Effective Focus Sessions">
+  1. **Set Realistic Durations** - Start with 25 min if new to Pomodoro
+  2. **Minimize Distractions** - Close notifications before starting
+  3. **Don't Skip Breaks** - Breaks are essential for sustained focus
+  4. **Track Streaks** - Aim for at least one session per day
+  5. **Review History** - Press 'h' weekly to see your progress
+</Accordion>
+
+<Accordion title="Pomodoro Technique Tips">
+  **Classic Pomodoro:**
+  - 25 min work
+  - 5 min break
+  - After 4 sessions: 15 min long break
+  
+  **Deep Work Variant:**
+  - 45-60 min work
+  - 10-15 min break
+  - Fewer sessions, deeper focus
+  
+  **Sprint Sessions:**
+  - 15 min work
+  - 5 min break
+  - Rapid iteration on tasks
+</Accordion>
+
+<Accordion title="Maintaining Streaks">
+  - Set a daily minimum (e.g., 2 sessions)
+  - Use the 7-day activity chart to spot gaps
+  - Link focus sessions to your daily todo review
+  - Celebrate milestones (7 days, 30 days, 100 days)
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Session didn't save">
+    Sessions only save when completed. If you:
+    - Pressed **c** to cancel → Not saved (by design)
+    - Closed the app mid-session → Not saved
+    - Completed the full timer → Should be saved
+    
+    Check history (press **h**) to verify.
+  </Accordion>
+  
+  <Accordion title="Duration picker auto-exit too fast">
+    The picker auto-exits 500ms after you stop pressing arrow keys. To keep it open:
+    - Press **Tab** to switch between work/break (resets timer)
+    - Or press **Enter** immediately after selecting
+  </Accordion>
+  
+  <Accordion title="Streak reset unexpectedly">
+    Streaks require at least one completed session per day. If a day is missed:
+    - Check the 7-day activity chart for gaps
+    - Streak counter resets to 0
+    - Start building a new streak!
+  </Accordion>
+</AccordionGroup>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Todos" icon="check" href="/features/todos">
+    Track tasks to tackle during focus sessions
+  </Card>
+  
+  <Card title="Notes" icon="note-sticky" href="/features/notes">
+    Capture insights during or after sessions
+  </Card>
+  
+  <Card title="Statistics" icon="chart-line" href="/features/focus-sessions">
+    Detailed analytics on your focus patterns
+  </Card>
+  
+  <Card title="Configuration" icon="gear" href="/configuration/customization">
+    Customize default durations and preferences
+  </Card>
+</CardGroup>

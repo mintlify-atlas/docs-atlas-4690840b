@@ -1,0 +1,392 @@
+---
+title: Keyboard Shortcuts
+description: Complete keyboard reference organized by screen for flowState CLI
+---
+
+## Global Navigation
+
+These shortcuts work from **any screen** in flowState CLI:
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `Ctrl+X` | Quick Capture | Instantly capture a note from anywhere |
+| `Ctrl+N` | Notes Screen | Navigate to Notes |
+| `Ctrl+T` | Todos Screen | Navigate to Todos |
+| `Ctrl+F` | Focus Screen | Navigate to Focus Sessions |
+| `Ctrl+/` | Search Screen | Navigate to Semantic Search |
+| `Ctrl+G` | Mind Map Screen | Navigate to Mind Map |
+| `Ctrl+L` | Link Modal | Open linking modal for selected item |
+| `Ctrl+H` | Home Screen | Return to home/help screen |
+| `?` | Help Modal | Show context-sensitive help |
+| `Esc` | Go Back / Cancel | Exit current mode or modal |
+| `q` | Quit | Exit flowState CLI |
+
+<Note>
+  **macOS users**: You can use `Cmd` (⌘) instead of `Ctrl` for all shortcuts.
+</Note>
+
+## Home Screen
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+N` | Navigate to Notes |
+| `Ctrl+T` | Navigate to Todos |
+| `Ctrl+X` | Quick Capture |
+| `Ctrl+F` | Navigate to Focus |
+| `q` | Quit |
+
+## Notes Screen
+
+### List View
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `c` | Create | Create new note |
+| `e` | Edit | Edit selected note |
+| `p` | Preview | Preview note (read-only markdown) |
+| `d` | Delete | Delete selected note (with confirmation) |
+| `/` | Filter | Open search filter |
+| `s` | Sort | Cycle sort mode (Date↓ → Title → Date↑) |
+| `t` | Tag Filter | Filter by tags (multi-select picker) |
+| `Ctrl+R` | Reset | Reset all filters |
+| `Ctrl+L` | Links | Open linking modal |
+| `j` / `↓` | Down | Move selection down |
+| `k` / `↑` | Up | Move selection up |
+| `Ctrl+H` | Home | Return to home screen |
+
+### Edit Mode
+
+When creating or editing a note:
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `Tab` | Switch Field | Toggle between title and body |
+| `Enter` | Save / New Line | Save (in title) or new line (in body) |
+| `Ctrl+S` | Save | Save note and return to list |
+| `Ctrl+E` | Preview | Toggle markdown preview |
+| `Ctrl+B` | Bold | Bold selected text |
+| `Ctrl+I` | Italic | Italic selected text |
+| `Ctrl+G` | Quick-Tag | Open tag picker (add existing tags) |
+| `Esc` | Cancel | Cancel and return to list |
+
+### Preview Mode
+
+| Key | Action |
+|-----|--------|
+| `e` | Edit | Switch to edit mode |
+| `p` | Close | Close preview |
+| `Esc` | Close | Close preview |
+
+### Tag Picker (Ctrl+G in Edit Mode)
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Navigate | Move through tag list |
+| `Space` | Select | Toggle tag selection |
+| `Enter` | Confirm | Add selected tags to note |
+| `Esc` | Cancel | Close picker without changes |
+
+### Tag Filter (t in List View)
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Navigate | Move through tag list |
+| `Space` | Select | Toggle tag for filtering |
+| `Enter` | Apply | Apply tag filters |
+| `Esc` | Cancel | Close picker without changes |
+
+## Todos Screen
+
+### List View
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `c` | Create | Create new todo |
+| `e` | Edit | Edit selected todo |
+| `v` | Preview | Preview todo details |
+| `d` | Delete | Delete selected todo (with confirmation) |
+| `Space` | Toggle | Toggle completion status |
+| `/` | Filter | Open search filter |
+| `s` | Sort | Cycle sort (Date↓ → Priority → Date↑ → A-Z → Due Date) |
+| `p` | Priority | Cycle priority filter (All → High → Medium → Low) |
+| `t` | Tag Filter | Filter by tags |
+| `Ctrl+R` | Reset | Reset all filters |
+| `Ctrl+L` | Links | Open linking modal |
+| `j` / `↓` | Down | Move selection down |
+| `k` / `↑` | Up | Move selection up |
+| `?` | Help | Show keyboard shortcuts |
+| `Ctrl+H` | Home | Return to home screen |
+
+### Edit Mode
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `Tab` | Switch Field | Toggle between title and description |
+| `Ctrl+S` | Save | Save todo and return to list |
+| `Esc` | Cancel | Cancel and return to list |
+
+### Preview Mode
+
+| Key | Action |
+|-----|--------|
+| `e` | Edit | Switch to edit mode |
+| `Esc` | Close | Close preview |
+
+## Focus Sessions Screen
+
+### Idle Mode
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `s` | Start | Start focus timer |
+| `d` | Duration | Change work/break duration |
+| `h` | History | Toggle history view |
+| `Ctrl+H` | Home | Return to home screen |
+
+### Running Mode
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `p` | Pause | Pause timer |
+| `c` | Cancel | Cancel current session |
+| `b` | Skip to Break | End work session, start break |
+
+### Paused Mode
+
+| Key | Action |
+|-----|--------|
+| `s` | Resume | Resume timer |
+| `c` | Cancel | Cancel session |
+
+### Break Mode
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `b` | Skip Break | End break, return to idle |
+| `c` | Cancel | Cancel break |
+| `Esc` | End Break | Return to idle |
+
+### Duration Picker
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `←` / `→` | Adjust | Change duration (auto-saves) |
+| `Tab` | Switch | Toggle work/break duration |
+| `Enter` | Done | Exit duration picker |
+| `Esc` | Cancel | Exit without changes |
+
+<Tip>
+  **Smart duration picker**: Just press `d`, use arrow keys to select, and the picker auto-exits after 500ms. No need to press Enter!
+</Tip>
+
+### History View
+
+| Key | Action |
+|-----|--------|
+| `d` | Delete | Delete selected session |
+| `h` | Back | Return to timer view |
+| `Esc` | Back | Return to timer view |
+
+## Semantic Search Screen
+
+### Query Input Mode
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `Enter` | Search | Execute semantic search |
+| `?` | Help | Show search tips |
+| `Esc` | Back | Return to previous screen |
+| `Ctrl+H` | Home | Return to home screen |
+
+### Results Mode
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `j` / `↓` | Down | Move down in results |
+| `k` / `↑` | Up | Move up in results |
+| `Enter` | Open Note | Open selected note |
+| `?` | Help | Show keyboard shortcuts |
+| `Esc` | Edit Query | Return to query input |
+| `Ctrl+H` | Home | Return to home screen |
+
+## Mind Map Screen
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `h` | Move Left | Navigate to left node |
+| `j` | Move Down | Navigate to node below |
+| `k` | Move Up | Navigate to node above |
+| `l` | Move Right | Navigate to right node |
+| `+` | Zoom In | Increase zoom level |
+| `-` | Zoom Out | Decrease zoom level |
+| `Enter` | Open Note | Open selected note |
+| `?` | Help | Show keyboard shortcuts |
+| `Esc` | Back | Return to notes screen |
+| `Ctrl+H` | Home | Return to home screen |
+
+## Linking Modal
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `c` | Create Link | Create new link |
+| `d` | Delete Link | Delete selected link |
+| `?` | Help | Show linking help |
+| `↑` / `↓` | Navigate | Navigate link types or targets |
+| `Enter` | Select / Confirm | Select link type or target |
+| `Esc` | Close / Back | Close modal or go back |
+
+### Link Creation Flow
+
+<Steps>
+  <Step title="Press c to create link">
+    Opens link type selection
+  </Step>
+  
+  <Step title="Select link type">
+    - **Related** - General relationship
+    - **Contains** - Parent-child relationship
+    - **References** - Citation or mention
+    
+    Use `↑/↓` to navigate, `Enter` to select
+  </Step>
+  
+  <Step title="Select target item">
+    Choose note or todo to link to. Use `↑/↓` to navigate, `Enter` to confirm
+  </Step>
+</Steps>
+
+## Quick Capture Modal
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `Ctrl+S` | Save | Save note and close modal |
+| `?` | Help | Show quick capture tips |
+| `Esc` | Cancel | Close modal without saving |
+
+<Note>
+  Quick Capture creates a note instantly from anywhere. Press `Ctrl+X`, type your thought, and press `Ctrl+S` - all without leaving your current screen.
+</Note>
+
+## Confirmation Dialogs
+
+Used for delete confirmations and other destructive actions:
+
+| Key | Action |
+|-----|--------|
+| `y` | Yes | Confirm action |
+| `n` | No | Cancel action |
+| `Esc` | Cancel | Cancel action |
+
+## Common Patterns
+
+### Navigation
+
+flowState CLI uses vim-style navigation wherever possible:
+
+- `j` / `↓` - Move down
+- `k` / `↑` - Move up
+- `h` - Move left (in Mind Map)
+- `l` - Move right (in Mind Map)
+
+### Input Fields
+
+- `Tab` - Switch between fields
+- `Shift+Tab` - Switch to previous field
+- `Ctrl+S` - Save
+- `Esc` - Cancel
+
+### Filters and Pickers
+
+- `↑` / `↓` - Navigate options
+- `Space` - Toggle selection (multi-select)
+- `Enter` - Confirm selection
+- `Esc` - Cancel without changes
+
+### Modifiers (Edit Mode)
+
+- `Ctrl+B` - Bold text
+- `Ctrl+I` - Italic text
+- `Ctrl+E` - Toggle preview
+- `Ctrl+G` - Quick-Tag picker
+
+## Platform Differences
+
+### macOS
+
+On macOS, you can use either `Ctrl` or `Cmd` (⌘) for all modifier shortcuts:
+
+- `Ctrl+N` or `Cmd+N` - Notes
+- `Ctrl+S` or `Cmd+S` - Save
+- etc.
+
+<Warning>
+  **Note**: `Cmd+H` may hide windows on macOS. Use `Ctrl+H` to return to home screen.
+</Warning>
+
+### Windows/Linux
+
+Use `Ctrl` for all modifier shortcuts.
+
+## Customization
+
+Keyboard shortcuts are currently hardcoded. Custom keybindings will be available in a future release.
+
+## Tips for Efficiency
+
+<CardGroup cols={2}>
+  <Card title="Master Quick Capture" icon="bolt">
+    Use `Ctrl+X` from anywhere to capture thoughts instantly. This is the fastest way to get ideas out of your head.
+  </Card>
+  
+  <Card title="Use Vim Navigation" icon="keyboard">
+    Learn `j/k` for up/down navigation. It's faster than reaching for arrow keys.
+  </Card>
+  
+  <Card title="Context Help" icon="circle-question">
+    Press `?` on any screen to see relevant shortcuts. No need to memorize everything.
+  </Card>
+  
+  <Card title="Global Navigation" icon="compass">
+    `Ctrl+N`, `Ctrl+T`, `Ctrl+F` - Jump between screens instantly without returning to home.
+  </Card>
+</CardGroup>
+
+## Cheat Sheet
+
+Print-friendly quick reference:
+
+```
+╔══════════════════════════════════════════════════════════╗
+║                   FLOWSTATE CLI                          ║
+║                 Keyboard Shortcuts                        ║
+╠══════════════════════════════════════════════════════════╣
+║ GLOBAL                                                   ║
+║  Ctrl+N      Notes      │  Ctrl+T      Todos             ║
+║  Ctrl+F      Focus      │  Ctrl+/      Search            ║
+║  Ctrl+X      Quick Cap  │  Ctrl+L      Links             ║
+║  Ctrl+H      Home       │  ?           Help              ║
+║  q           Quit       │  Esc         Back/Cancel       ║
+╠══════════════════════════════════════════════════════════╣
+║ NOTES / TODOS LIST                                       ║
+║  c           Create     │  e           Edit              ║
+║  p           Preview    │  d           Delete            ║
+║  Space       Toggle     │  /           Filter            ║
+║  s           Sort       │  t           Tag Filter        ║
+║  Ctrl+R      Reset      │  j/k         Navigate          ║
+╠══════════════════════════════════════════════════════════╣
+║ EDIT MODE                                                ║
+║  Ctrl+S      Save       │  Tab         Switch Field      ║
+║  Ctrl+E      Preview    │  Ctrl+B      Bold              ║
+║  Ctrl+I      Italic     │  Ctrl+G      Quick-Tag         ║
+║  Esc         Cancel     │                                ║
+╠══════════════════════════════════════════════════════════╣
+║ FOCUS TIMER                                              ║
+║  s           Start      │  p           Pause             ║
+║  c           Cancel     │  b           Skip to Break     ║
+║  d           Duration   │  h           History           ║
+╚══════════════════════════════════════════════════════════╝
+```
+
+<Tip>
+  Save this cheat sheet for quick reference while you're learning flowState CLI!
+</Tip>

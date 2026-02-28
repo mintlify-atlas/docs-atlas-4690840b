@@ -1,0 +1,347 @@
+---
+title: Data Structures
+description: Core data models for notes, todos, focus sessions, and links
+---
+
+## Overview
+
+flowState uses four primary data models: **Note**, **Todo**, **FocusSession**, and **Link**. All models include timestamps for auditing and are stored in SQLite.
+
+<Info>
+All models are defined in `internal/models/models.go` with JSON serialization support.
+</Info>
+
+## Note
+
+Represents a note in the flowState system with auto-extracted tags and timestamps.
+
+<ParamField path="ID" type="int64" required>
+  Unique identifier (auto-incremented by SQLite)
+</ParamField>
+
+<ParamField path="Title" type="string" required>
+  Short descriptive title for the note
+</ParamField>
+
+<ParamField path="Body" type="string">
+  Full note content supporting markdown and multiline text
+  
+  <Expandable title="Tag Extraction">
+    Tags are automatically extracted from both title and body using:
+    - `#hashtag` syntax
+    - `@mention` syntax
+    
+    Example: `"Check #golang docs @productivity"` → `["golang", "productivity"]`
+  </Expandable>
+</ParamField>
+
+<ParamField path="Tags" type="[]string">
+  Slice of tags extracted from `#hashtag` and `@mention` syntax in title and body
+  
+  <Tip>
+    Use Ctrl+G while editing to open the Quick-Tag picker and add existing tags to your note body.
+  </Tip>
+</ParamField>
+
+<ParamField path="CreatedAt" type="time.Time" required>
+  Timestamp when the note was created (RFC3339 format)
+</ParamField>
+
+<ParamField path="UpdatedAt" type="time.Time" required>
+  Timestamp when the note was last modified (RFC3339 format)
+</ParamField>
+
+### JSON Example
+
+```json
+{
+  "id": 42,
+  "title": "Project Ideas",
+  "body": "Build a #cli tool for #productivity\nIdeas:\n- @task-manager\n- @note-taking",
+  "tags": ["cli", "productivity", "task-manager", "note-taking"],
+  "created_at": "2026-02-28T10:30:00Z",
+  "updated_at": "2026-02-28T14:22:00Z"
+}
+```
+
+<Note>
+Tags are stored as a JSON array in SQLite's `tags` column (TEXT type).
+</Note>
+
+## Todo
+
+Represents a task with status tracking, priority levels, and optional due date.
+
+<ParamField path="ID" type="int64" required>
+  Unique identifier (auto-incremented by SQLite)
+</ParamField>
+
+<ParamField path="Title" type="string" required>
+  Short task title
+</ParamField>
+
+<ParamField path="Description" type="string">
+  Detailed task description
+</ParamField>
+
+<ParamField path="Status" type="TodoStatus" required default="pending">
+  Current task status
+  
+  <Expandable title="TodoStatus Values">
+    <ResponseField name="pending" type="string">
+      Task not started (yellow badge)
+    </ResponseField>
+    
+    <ResponseField name="in_progress" type="string">
+      Task currently being worked on (cyan badge)
+    </ResponseField>
+    
+    <ResponseField name="completed" type="string">
+      Task finished (green badge)
+    </ResponseField>
+  </Expandable>
+  
+  <Tip>
+    Press `Space` in the todos list to toggle between pending and completed.
+  </Tip>
+</ParamField>
+
+<ParamField path="Priority" type="TodoPriority" required default="0">
+  Task importance level
+  
+  <Expandable title="TodoPriority Values">
+    <ResponseField name="0" type="int">
+      **Low** - Minor tasks (🟢 green indicator)
+    </ResponseField>
+    
+    <ResponseField name="1" type="int">
+      **Medium** - Normal tasks (no indicator)
+    </ResponseField>
+    
+    <ResponseField name="2" type="int">
+      **High** - Urgent/important tasks (🔴 red indicator)
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+<ParamField path="DueDate" type="*time.Time">
+  Optional due date for the task
+  
+  <Tip>
+    Due dates display with relative time indicators:
+    - ⚠️ "Overdue" (past due)
+    - 📅 "Due today"
+    - ⏰ "Due in X days"
+  </Tip>
+</ParamField>
+
+<ParamField path="NoteID" type="*int64">
+  Optional link to a related note (foreign key to `notes.id`)
+</ParamField>
+
+<ParamField path="CreatedAt" type="time.Time" required>
+  Timestamp when the todo was created
+</ParamField>
+
+<ParamField path="UpdatedAt" type="time.Time" required>
+  Timestamp when the todo was last modified
+</ParamField>
+
+### JSON Example
+
+```json
+{
+  "id": 15,
+  "title": "Write documentation",
+  "description": "Document the CLI reference pages for flowState",
+  "status": "in_progress",
+  "priority": 2,
+  "due_date": "2026-03-01T17:00:00Z",
+  "note_id": 42,
+  "created_at": "2026-02-28T09:00:00Z",
+  "updated_at": "2026-02-28T14:30:00Z"
+}
+```
+
+<Note>
+`DueDate` and `NoteID` are nullable fields (stored as `NULL` in SQLite when omitted).
+</Note>
+
+## FocusSession
+
+Represents a Pomodoro-style focus timer session with duration tracking.
+
+<ParamField path="ID" type="int64" required>
+  Unique identifier (auto-incremented by SQLite)
+</ParamField>
+
+<ParamField path="StartTime" type="time.Time" required>
+  When the session began
+</ParamField>
+
+<ParamField path="EndTime" type="*time.Time">
+  When the session ended (nil if currently running)
+</ParamField>
+
+<ParamField path="Duration" type="int" required>
+  Planned duration in seconds (e.g., 1500 for 25 minutes)
+</ParamField>
+
+<ParamField path="Status" type="SessionStatus" required>
+  Session status
+  
+  <Expandable title="SessionStatus Values">
+    <ResponseField name="running" type="string">
+      Session is currently active
+    </ResponseField>
+    
+    <ResponseField name="completed" type="string">
+      Session finished successfully
+    </ResponseField>
+    
+    <ResponseField name="cancelled" type="string">
+      Session was cancelled before completion
+    </ResponseField>
+  </Expandable>
+  
+  <Warning>
+    Sessions are only saved to the database when **completed**. Starting a session does not create a DB record to allow free navigation before committing.
+  </Warning>
+</ParamField>
+
+<ParamField path="CreatedAt" type="time.Time" required>
+  Timestamp when the session record was created
+</ParamField>
+
+### JSON Example
+
+```json
+{
+  "id": 8,
+  "start_time": "2026-02-28T14:00:00Z",
+  "end_time": "2026-02-28T14:25:00Z",
+  "duration": 1500,
+  "status": "completed",
+  "created_at": "2026-02-28T14:25:00Z"
+}
+```
+
+<Tip>
+The Focus screen displays session statistics including:
+- Today's completed sessions
+- Total sessions
+- Total focus time (minutes)
+- Current streak (consecutive days with at least one session)
+</Tip>
+
+## Link
+
+Represents a relationship between two items (note-to-note, note-to-todo, etc.).
+
+<ParamField path="ID" type="int64" required>
+  Unique identifier (auto-incremented by SQLite)
+</ParamField>
+
+<ParamField path="SourceType" type="string" required>
+  Type of the source item (e.g., `"note"` or `"todo"`)
+</ParamField>
+
+<ParamField path="SourceID" type="int64" required>
+  ID of the source item
+</ParamField>
+
+<ParamField path="TargetType" type="string" required>
+  Type of the target item (e.g., `"note"` or `"todo"`)
+</ParamField>
+
+<ParamField path="TargetID" type="int64" required>
+  ID of the target item
+</ParamField>
+
+<ParamField path="LinkType" type="LinkType" required>
+  Type of relationship
+  
+  <Expandable title="LinkType Values">
+    <ResponseField name="related" type="string">
+      Generic relationship between items
+    </ResponseField>
+    
+    <ResponseField name="contains" type="string">
+      Source contains or includes the target
+    </ResponseField>
+    
+    <ResponseField name="references" type="string">
+      Source references the target
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+<ParamField path="CreatedAt" type="time.Time" required>
+  Timestamp when the link was created
+</ParamField>
+
+### JSON Example
+
+```json
+{
+  "id": 3,
+  "source_type": "note",
+  "source_id": 42,
+  "target_type": "todo",
+  "target_id": 15,
+  "link_type": "related",
+  "created_at": "2026-02-28T14:30:00Z"
+}
+```
+
+<Note>
+The SQLite schema enforces a `UNIQUE` constraint on `(source_type, source_id, target_type, target_id)` to prevent duplicate links.
+</Note>
+
+<Tip>
+Press `Ctrl+L` on any note or todo to open the linking modal and create/view relationships.
+</Tip>
+
+## Type Constants
+
+For convenience, flowState defines constants for enum-like types:
+
+### Todo Status
+
+```go
+const (
+    TodoStatusPending    TodoStatus = "pending"
+    TodoStatusInProgress TodoStatus = "in_progress"
+    TodoStatusCompleted  TodoStatus = "completed"
+)
+```
+
+### Todo Priority
+
+```go
+const (
+    TodoPriorityLow    TodoPriority = 0
+    TodoPriorityMedium TodoPriority = 1
+    TodoPriorityHigh   TodoPriority = 2
+)
+```
+
+### Session Status
+
+```go
+const (
+    SessionStatusRunning   SessionStatus = "running"
+    SessionStatusCompleted SessionStatus = "completed"
+    SessionStatusCancelled SessionStatus = "cancelled"
+)
+```
+
+### Link Type
+
+```go
+const (
+    LinkTypeRelated    LinkType = "related"
+    LinkTypeContains   LinkType = "contains"
+    LinkTypeReferences LinkType = "references"
+)
+```
