@@ -1,0 +1,93 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "flowState CLI",
+  "projectDescription": "A TUI productivity system for notes, todos, and focus sessions with semantic search capabilities.",
+  "theme": "aspen",
+  "primaryColor": "#6c5ce7",
+  "lightColor": "#fd79a8",
+  "darkColor": "#00cec9",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart",
+              "keyboard-shortcuts"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/notes",
+              "features/todos",
+              "features/focus-sessions"
+            ]
+          },
+          {
+            "group": "Advanced Features",
+            "pages": [
+              "features/linking",
+              "features/mind-map",
+              "features/semantic-search",
+              "features/quick-capture"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/setup",
+              "configuration/customization",
+              "configuration/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "CLI Reference",
+            "pages": [
+              "reference/commands",
+              "reference/data-structures",
+              "reference/database-schema"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/architecture",
+              "development/contributing",
+              "development/releasing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Notes with markdown, wikilinks, and #hashtag tagging",
+    "Todo management with priorities, due dates, and status tracking",
+    "Pomodoro-style focus timer with session history",
+    "Local semantic search with ONNX embeddings",
+    "Bidirectional linking between notes and todos",
+    "Visual mind map of note connections",
+    "Quick capture (Ctrl+X) from anywhere",
+    "100% local - no cloud dependencies"
+  ],
+  "publicApiSurface": [
+    "flowstate - Main CLI command",
+    "Notes Screen (Ctrl+N) - Create, edit, preview, delete notes",
+    "Todos Screen (Ctrl+T) - Manage tasks with priorities and due dates",
+    "Focus Screen (Ctrl+F) - Pomodoro timer with breaks",
+    "Search Screen (Ctrl+/) - Semantic search across notes",
+    "Mind Map Screen (Ctrl+G) - Visual graph navigation",
+    "Quick Capture (Ctrl+X) - Instant note creation",
+    "Linking Modal (Ctrl+L) - Create relationships between items"
+  ]
+}
